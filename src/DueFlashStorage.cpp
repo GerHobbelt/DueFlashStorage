@@ -19,7 +19,7 @@ byte* DueFlashStorage::readAddress(uint32_t address) {
 
 boolean DueFlashStorage::write(uint32_t address, byte value) {
   uint32_t retCode;
-  uint32_t byteLength = 1;  
+  uint32_t byteLength = 1;
 
   retCode = flash_unlock((uint32_t)FLASH_START+address, (uint32_t)FLASH_START+address + byteLength - 1, 0, 0);
   if (retCode != FLASH_RC_OK) {
@@ -88,7 +88,7 @@ boolean DueFlashStorage::write(uint32_t address, byte *data, uint32_t dataLength
 
 boolean DueFlashStorage::write_unlocked(uint32_t address, byte value) {
   uint32_t retCode;
-  uint32_t byteLength = 1;  
+  uint32_t byteLength = 1;
 
   // write data
   retCode = flash_write((uint32_t)FLASH_START+address, &value, byteLength, 1);

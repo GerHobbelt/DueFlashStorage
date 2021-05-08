@@ -25,7 +25,7 @@ Rewritten and modified by Sebastian Nilsson
 #define  FLASH_START  ((byte *)IFLASH1_ADDR)
 
 //  FLASH_DEBUG can be enabled to get debugging information displayed.
-#define FLASH_DEBUG
+// #define FLASH_DEBUG
 
 #ifdef FLASH_DEBUG
 #define _FLASH_DEBUG(x) Serial.print(x);
