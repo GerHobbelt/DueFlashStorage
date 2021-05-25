@@ -45,6 +45,12 @@ public:
   
 	byte read(uint32_t address);
 	byte* readAddress(uint32_t address);
+	
+	uint32_t getFlashSize() const
+	{
+		return IFLASH1_SIZE;
+	}
+	
 	boolean write(uint32_t address, byte value);
 	boolean write(uint32_t address, byte *data, uint32_t dataLength);
 	boolean write_unlocked(uint32_t address, byte value);
