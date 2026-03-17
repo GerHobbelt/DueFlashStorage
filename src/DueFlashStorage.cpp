@@ -89,11 +89,9 @@ boolean DueFlashStorage::write(uint32_t address, byte *data, uint32_t dataLength
 boolean DueFlashStorage::write_unlocked(uint32_t address, byte value) {
   uint32_t retCode;
   uint32_t byteLength = 1;  
-  byte *data;
 
   // write data
   retCode = flash_write((uint32_t)FLASH_START+address, &value, byteLength, 1);
-  //retCode = flash_write((uint32_t)FLASH_START, data, byteLength, 1);
 
   if (retCode != FLASH_RC_OK) {
     _FLASH_DEBUG("Flash write failed\n");
@@ -116,7 +114,7 @@ boolean DueFlashStorage::write_unlocked(uint32_t address, byte *data, uint32_t d
     return false;
   }
 
-  if (((uint32_t)FLASH_START+address & 3) != 0) {
+  if ((((uint32_t)FLASH_START+address) & 3) != 0) {
     _FLASH_DEBUG("Flash start address must be on four byte boundary\n");
     return false;
   }
