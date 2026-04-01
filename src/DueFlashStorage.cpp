@@ -63,6 +63,15 @@ boolean DueFlashStorage::write(uint32_t address, byte value) {
 boolean DueFlashStorage::write(uint32_t address, byte *data, uint32_t dataLength) {
   uint32_t retCode;
 
+  if (address < IFLASH0_SIZE && address + dataLength > IFLASH0_SIZE)
+  {
+	// A write across the boundary of the flash pages requires two calls
+	uint32_t lowerSize = IFLASH0_SIZE - address;
+	boolean ret = write(address, data, lowerSize);
+	ret &= write(IFLASH0_SIZE, data + lowerSize, dataLength - lowerSize);
+	return ret;
+  }
+  
   if ((uint32_t)FLASH_START + address < IFLASH0_ADDR) {
     flash_debug(2, "Flash write address too low\n");
     return false;
