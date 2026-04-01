@@ -508,39 +508,46 @@ uint32_t flash_write(uint32_t ul_address, const void *p_buffer,
 		compute_address(p_efc, us_page, 0, &ul_page_addr);
 		us_padding = IFLASH_PAGE_SIZE - us_offset - writeSize;
 
-		/* Pre-buffer data */
-		memcpy(puc_page_buffer, (void *)ul_page_addr, us_offset);
+		/* Check if the current data already matches the data to be written: if so, SKIP */
+		auto match = memcmp((const uint8_t *)ul_page_addr + us_offset, p_buffer, writeSize);
+		if (match != 0) {
+			/* Pre-buffer data */
+			memcpy(puc_page_buffer, (void *)ul_page_addr, us_offset);
 
-		/* Buffer data */
-		memcpy(puc_page_buffer + us_offset, p_buffer, writeSize);
+			/* Buffer data */
+			memcpy(puc_page_buffer + us_offset, p_buffer, writeSize);
 
-		/* Post-buffer data */
-		memcpy(puc_page_buffer + us_offset + writeSize,
-				(void *)(ul_page_addr + us_offset + writeSize),
-				us_padding);
+			/* Post-buffer data */
+			memcpy(puc_page_buffer + us_offset + writeSize,
+					(void *)(ul_page_addr + us_offset + writeSize),
+					us_padding);
 
-		/* Write page.
-		 * Writing 8-bit and 16-bit data is not allowed and may lead to
-		 * unpredictable data corruption.
-		 */
-		p_aligned_dest = (uint32_t *) ul_page_addr;
-		for (ul_idx = 0; ul_idx < (IFLASH_PAGE_SIZE / sizeof(uint32_t));
-				++ul_idx) {
-			*p_aligned_dest++ = gs_ul_page_buffer[ul_idx];
+			/* Write page.
+			 * Writing 8-bit and 16-bit data is not allowed and may lead to
+			 * unpredictable data corruption.
+			 */
+			p_aligned_dest = (uint32_t *) ul_page_addr;
+			for (ul_idx = 0; ul_idx < (IFLASH_PAGE_SIZE / sizeof(uint32_t));
+					++ul_idx) {
+				*p_aligned_dest++ = gs_ul_page_buffer[ul_idx];
+			}
+
+			if (ul_erase_flag) {
+				ul_error = efc_perform_command(p_efc, EFC_FCMD_EWP,
+						us_page);
+			} else {
+				ul_error = efc_perform_command(p_efc, EFC_FCMD_WP,
+						us_page);
+			}
+
+			if (ul_error) {
+				return ul_error;
+			}
 		}
-
-		if (ul_erase_flag) {
-			ul_error = efc_perform_command(p_efc, EFC_FCMD_EWP,
-					us_page);
-		} else {
-			ul_error = efc_perform_command(p_efc, EFC_FCMD_WP,
-					us_page);
+		else {
+			flash_debug(1, "Flash sector already contains matching data: skipping write operation\n");
 		}
-
-		if (ul_error) {
-			return ul_error;
-		}
-
+		
 		/* Progression */
 		p_buffer = (void *)((uint32_t) p_buffer + writeSize);
 		ul_size -= writeSize;
