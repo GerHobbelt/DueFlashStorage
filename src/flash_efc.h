@@ -140,6 +140,17 @@ uint32_t flash_write_user_signature(uint32_t ul_address, const void *p_buffer,
 uint32_t flash_erase_user_signature(void);
 #endif
 
+#ifndef FLASH_DEBUG
+//  FLASH_DEBUG can be enabled to get debugging information displayed.
+#define FLASH_DEBUG 1
+#endif
+
+#if FLASH_DEBUG
+extern void flash_debug(int level, const char *message);
+#else
+#define flash_debug(level, message)  /**/
+#endif
+
 /// @cond 0
 /**INDENT-OFF**/
 #ifdef __cplusplus

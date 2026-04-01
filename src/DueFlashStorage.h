@@ -24,19 +24,6 @@ Rewritten and modified by Sebastian Nilsson
 // choose a start address that's offset to show that it doesn't have to be on a page boundary
 #define  FLASH_START  ((byte *)IFLASH1_ADDR)
 
-//  FLASH_DEBUG can be enabled to get debugging information displayed.
-// #define FLASH_DEBUG
-
-#ifdef FLASH_DEBUG
-#ifndef DEBUGPRINT
-#define _FLASH_DEBUG(x) DEBUGPRINT((-1, x))
-#else
-#define _FLASH_DEBUG(x) Serial.print(x)
-#endif
-#else
-#define _FLASH_DEBUG(x)
-#endif
-
 //  DueFlash is the main class for flash functions
 class DueFlashStorage {
 public:
