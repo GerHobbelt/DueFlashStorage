@@ -17,6 +17,22 @@ byte* DueFlashStorage::readAddress(uint32_t address) {
   return FLASH_START+address;
 }
 
+uint32_t DueFlashStorage::getOffset(byte* address) {
+	return address - FLASH_START;
+}
+
+extern "C" unsigned char _etext;
+extern "C" unsigned char _srelocate;
+extern "C" unsigned char _erelocate;
+// See https://arduino.stackexchange.com/questions/83911/how-do-i-get-the-size-of-my-program-at-runtime/83916#83916 for
+// an explanation of this function
+byte* DueFlashStorage::getFirstFreeBlock()
+{
+	byte *rom_end = &_etext + (&_erelocate - &_srelocate);
+	rom_end = (byte*)(((uint32_t)rom_end + 256) & ~0xFF); // Align to next free flash block (even if the memory ends right on a boundary)
+	return rom_end;
+}
+
 boolean DueFlashStorage::write(uint32_t address, byte value) {
   uint32_t retCode;
   uint32_t byteLength = 1;
@@ -156,3 +172,8 @@ boolean DueFlashStorage::write_unlocked(uint32_t address, byte *data, uint32_t d
   return true;
 }
 
+boolean DueFlashStorage::write(byte* address, byte *data, uint32_t dataLength)
+{
+	uint32_t offset = getOffset(address);
+	return write(offset, data, dataLength);
+}

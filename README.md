@@ -33,11 +33,11 @@ https://www.arduino.cc/en/Guide/Cores
 ### Basic use
 
 ```cpp
-// write the value 123 to address 0
-dueFlashStorage.write(0,123);
+// write the value 123 to offset 0x20000
+dueFlashStorage.write(0x20000, 123);
 
-// read byte at address 0
-byte b = dueFlashStorage.read(0);
+// read byte at offset 0
+byte b = dueFlashStorage.read(0x20000);
 ```
 
 ### Advanced use to store configuration parameters
