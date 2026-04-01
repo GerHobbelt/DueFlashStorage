@@ -87,7 +87,8 @@ void setup() {
 void loop() {
   byte* firstDataAddress = dueFlashStorage.getFirstFreeBlock();
   Configuration* cfg = (Configuration*)(firstDataAddress + 4);
-    // print the content
+
+  // print the content
   Serial.print("a:");
   Serial.print(cfg->a);
 
@@ -103,6 +104,20 @@ void loop() {
   Serial.print(" c:");
   Serial.print(cfg->c);
   Serial.println();
+
+  /* change some values in the struct and write them back */
+  // increment b by 1 (modulus 100 to start over at 0 when 100 is reached)
+  cfg->b = (cfg->b + 1) % 100;
+
+  // change the message
+  String message = cfg->message;
+  if (cfg->message == "Hello world!")
+    cfg->message = "Hello Arduino Due!";
+  else
+    cfg->message = "Hello world!";
+
+  // write configuration struct to flash at adress 4
+  dueFlashStorage.write(4, cfg, sizeof(Configuration));
 
   delay(1000);
 }
