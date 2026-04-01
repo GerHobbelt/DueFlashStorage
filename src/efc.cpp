@@ -245,7 +245,6 @@ uint32_t efc_get_result(Efc *p_efc)
  *
  * \return 0 if successful, otherwise returns an error code.
  */
-RAMFUNC
 uint32_t efc_perform_read_sequence(Efc *p_efc,
 		uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
 		uint32_t *p_ul_buf, uint32_t ul_size)
@@ -303,7 +302,6 @@ uint32_t efc_perform_read_sequence(Efc *p_efc,
  * \param p_efc Pointer to an EFC instance.
  * \param ul_fmr Value of mode register
  */
-RAMFUNC
 void efc_write_fmr(Efc *p_efc, uint32_t ul_fmr)
 {
 	p_efc->EEFC_FMR = ul_fmr;
@@ -317,7 +315,6 @@ void efc_write_fmr(Efc *p_efc, uint32_t ul_fmr)
  *
  * \return The current status.
  */
-RAMFUNC
 uint32_t efc_perform_fcr(Efc *p_efc, uint32_t ul_fcr)
 {
 	volatile uint32_t ul_status;
