@@ -22,7 +22,7 @@ Rewritten and modified by Sebastian Nilsson
 #define DATA_LENGTH   ((IFLASH1_PAGE_SIZE/sizeof(byte))*4)
 
 // choose a start address that's offset to show that it doesn't have to be on a page boundary
-#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+#define  FLASH_START  ((byte *)IFLASH0_ADDR)
 
 //  DueFlash is the main class for flash functions
 class DueFlashStorage {
