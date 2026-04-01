@@ -40,6 +40,10 @@
  * \asf_license_stop
  *
  */
+ 
+// WARNING: copy of SAM package file: 
+//
+//   C:\Users\<User>\AppData\Local\Arduino15\packages\arduino\hardware\sam\1.6.12\system\libsam\include\efc.h
 
 #ifndef EFC_H_INCLUDED
 #define EFC_H_INCLUDED
@@ -47,8 +51,9 @@
 #include <Arduino.h>
 #include <inttypes.h>
 
+#include "ramfunc_attr.h"
+
 #define SAM3XA
-#define RAMFUNC __attribute__ ((section(".ramfunc")))
 
 /// @cond 0
 /**INDENT-OFF**/
@@ -124,6 +129,7 @@ uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
 		uint32_t ul_argument);
 uint32_t efc_get_status(Efc *p_efc);
 uint32_t efc_get_result(Efc *p_efc);
+RAMFUNC
 uint32_t efc_perform_read_sequence(Efc *p_efc,
 		uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
 		uint32_t *p_ul_buf, uint32_t ul_size);

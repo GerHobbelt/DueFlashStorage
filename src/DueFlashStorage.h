@@ -28,7 +28,11 @@ Rewritten and modified by Sebastian Nilsson
 // #define FLASH_DEBUG
 
 #ifdef FLASH_DEBUG
-#define _FLASH_DEBUG(x) Serial.print(x);
+#ifndef DEBUGPRINT
+#define _FLASH_DEBUG(x) DEBUGPRINT((-1, x))
+#else
+#define _FLASH_DEBUG(x) Serial.print(x)
+#endif
 #else
 #define _FLASH_DEBUG(x)
 #endif

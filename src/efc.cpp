@@ -42,6 +42,7 @@
  */
 
 #include "efc.h"
+#include "ramfunc_attr.h"
 
 /// @cond 0
 /**INDENT-OFF**/

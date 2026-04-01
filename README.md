@@ -1,7 +1,9 @@
 # DueFlashStorage
+
 DueFlashStorage saves non-volatile data for Arduino Due. The library is made to be similar to the EEPROM library. Uses flash block 1 per default.
 
 ### Features
+
 - Non-volatile data storage. Resetting or loss of power to the Arduino will not affect the data.
 - Similar to the standard EEPROM library
 - Write and read byte by byte
@@ -12,6 +14,12 @@ Note: The flash storage is reset every time you upload a new sketch to your Ardu
 Inspiration and some code from Pansenti at https://github.com/Pansenti/DueFlash
 
 ## Install
+
+Create a new folder in your Arduino sketch folder named DueFlashStorage. 
+Download and put all files from this repository into the folder. 
+
+or:
+
 Arduino.cc has some good instructions on how to add libraries:
 https://www.arduino.cc/en/Guide/Libraries
 
@@ -21,7 +29,9 @@ Remember that you also need to install the Arduino SAM Boards from the board man
 https://www.arduino.cc/en/Guide/Cores
 
 ## Use
+
 ### Basic use
+
 ```cpp
 // write the value 123 to address 0
 dueFlashStorage.write(0,123);
@@ -31,6 +41,7 @@ byte b = dueFlashStorage.read(0);
 ```
 
 ### Advanced use to store configuration parameters
+
 ```cpp
 // say you want to store a struct with parameters:
 struct Configuration {
@@ -56,16 +67,20 @@ memcpy(&configurationFromFlash, b, sizeof(Configuration)); // copy byte array to
 ```
 
 ## Examples
+
 ### DueFlashStorageExample.cpp
+
 This example will write 3 bytes to 3 different addresses and print them to the serial monitor.
 Try resetting the Arduino Due or unplug the power to it. The values will stay stored.
    
 ### DueFlashStorageStructExample.cpp
+
 This example will write a struct to memory which is a very convinient way of storing configuration parameters.
 Try resetting the Arduino Due or unplug the power to it. The values will stay stored.
 
 
 ## Support my creation of open source software:
+
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sebnil&url=https://github.com/sebnil/DueFlashStorage)
 
 <a href='https://ko-fi.com/A0A2HYRH' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi2.png?v=0' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
