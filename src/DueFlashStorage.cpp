@@ -13,6 +13,7 @@ DueFlashStorage::DueFlashStorage() {
 byte DueFlashStorage::read(uint32_t address) {
   return FLASH_START[address];
 }
+
 byte* DueFlashStorage::readAddress(uint32_t address) {
   return FLASH_START + address;
 }
@@ -29,7 +30,7 @@ extern "C" unsigned char _erelocate;
 // an explanation of this function
 byte* DueFlashStorage::getFirstFreeBlock() {
   byte* rom_end = &_etext + (&_erelocate - &_srelocate);
-  rom_end = (byte*)(((uint32_t)rom_end + 256) & ~0xFF);  // Align to next free flash block (even if the memory ends right on a boundary)
+  rom_end = (byte*)(((uint32_t)rom_end + 255) & ~0xFF);  // Align to next free flash block (even if the memory ends right on a boundary)
   return rom_end;
 }
 
