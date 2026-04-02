@@ -34,45 +34,9 @@ byte* DueFlashStorage::getFirstFreeBlock() {
   return rom_end;
 }
 
-boolean DueFlashStorage::write(uint32_t address, byte value) {
-  uint32_t retCode;
-  uint32_t byteLength = 1;
+bool DueFlashStorage::validateAddress(uint32_t address, uint32_t dataLength) const {
 
-  retCode = flash_unlock((uint32_t)FLASH_START + address, (uint32_t)FLASH_START + address + byteLength - 1, 0, 0);
-  if (retCode != FLASH_RC_OK) {
-    flash_debug(2, "Failed to unlock flash for write\n");
-    return false;
-  }
-
-  // write data
-  retCode = flash_write((uint32_t)FLASH_START + address, &value, byteLength, 1);
-
-  if (retCode != FLASH_RC_OK) {
-    flash_debug(2, "Flash write failed\n");
-    return false;
-  }
-
-  // Lock page
-  retCode = flash_lock((uint32_t)FLASH_START + address, (uint32_t)FLASH_START + address + byteLength - 1, 0, 0);
-  if (retCode != FLASH_RC_OK) {
-    flash_debug(2, "Failed to lock flash page\n");
-    return false;
-  }
-  return true;
-}
-
-boolean DueFlashStorage::write(uint32_t address, byte* data, uint32_t dataLength) {
-  uint32_t retCode;
-
-  if (address < IFLASH0_SIZE && address + dataLength > IFLASH0_SIZE) {
-    // A write across the boundary of the flash pages requires two calls
-    const uint32_t lowerSize = IFLASH0_SIZE - address;
-    boolean ret = write(address, data, lowerSize);
-    ret &= write(IFLASH0_SIZE, data + lowerSize, dataLength - lowerSize);
-    return ret;
-  }
-
-  if ((uint32_t)FLASH_START + address < IFLASH0_ADDR) {
+  if (FLASH_START + address < getFirstFreeBlock()) {
     flash_debug(2, "Flash write address too low\n");
     return false;
   }
@@ -87,27 +51,48 @@ boolean DueFlashStorage::write(uint32_t address, byte* data, uint32_t dataLength
     return false;
   }
 
-  if ((address & 3) != 0) {
-    flash_debug(2, "Flash start address must be on four byte boundary\n");
+  return true;
+}
+
+boolean DueFlashStorage::write(uint32_t address, byte* data, uint32_t dataLength, bool with_locking) {
+  uint32_t retCode;
+
+  if (!validateAddress(address, dataLength)) {
     return false;
   }
 
+  if (address < IFLASH0_SIZE && address + dataLength > IFLASH0_SIZE) {
+    // A write across the boundary of the flash pages requires two calls
+    const uint32_t lowerSize = IFLASH0_SIZE - address;
+    boolean ret = write(address, data, lowerSize);
+    ret &= write(IFLASH0_SIZE, data + lowerSize, dataLength - lowerSize);
+    return ret;
+  }
+
   // Unlock page
-  bool needToDisableInterrupts = (address < IFLASH0_SIZE);
+  const bool needToDisableInterrupts = ((address < IFLASH0_SIZE) || (address < uint32_t(getFirstFreeBlock() - FLASH_START)));
   if (needToDisableInterrupts) {
     noInterrupts();
   }
 
   bool result = true;
-  retCode = flash_unlock((uint32_t)FLASH_START + address, (uint32_t)FLASH_START + address + dataLength - 1, 0, 0);
-  if (retCode != FLASH_RC_OK) {
-    flash_debug(2, "Failed to unlock flash for write\n");
-    result = false;
+  if (with_locking) {
+    retCode = flash_unlock((uint32_t)FLASH_START + address, (uint32_t)FLASH_START + address + dataLength - 1, 0, 0);
+    if (retCode != FLASH_RC_OK) {
+      flash_debug(2, "Failed to unlock flash for write\n");
+      result = false;
+    }
   }
 
   // write data
   if (result) {
-    retCode = flash_write((uint32_t)FLASH_START + address, data, dataLength, 1);
+    // always try a write WITHOUT erase first:
+    retCode = flash_write((uint32_t)FLASH_START + address, data, dataLength, 0);
+    if (retCode != FLASH_RC_OK) {
+      flash_debug(1, "Flash write sans erase failed; retrying with erase.\n");
+
+      retCode = flash_write((uint32_t)FLASH_START + address, data, dataLength, 1);
+    }
 
     if (retCode != FLASH_RC_OK) {
       flash_debug(2, "Flash write failed\n");
@@ -116,7 +101,8 @@ boolean DueFlashStorage::write(uint32_t address, byte* data, uint32_t dataLength
   }
 
   // Lock page
-  if (result) {
+  if (with_locking) {
+    // always re-lock page when previously unlock was attempted above, whether that one succeeded or failed is irrelevant.
     retCode = flash_lock((uint32_t)FLASH_START + address, (uint32_t)FLASH_START + address + dataLength - 1, 0, 0);
     if (retCode != FLASH_RC_OK) {
       flash_debug(2, "Failed to lock flash page\n");
@@ -127,65 +113,7 @@ boolean DueFlashStorage::write(uint32_t address, byte* data, uint32_t dataLength
   if (needToDisableInterrupts) {
     interrupts();
   }
+
   return result;
 }
 
-boolean DueFlashStorage::write_unlocked(uint32_t address, byte value) {
-  uint32_t retCode;
-  uint32_t byteLength = 1;
-
-  // write data
-  retCode = flash_write((uint32_t)FLASH_START + address, &value, byteLength, 1);
-
-  if (retCode != FLASH_RC_OK) {
-    flash_debug(2, "Flash write failed\n");
-    return false;
-  }
-
-  return true;
-}
-
-boolean DueFlashStorage::write_unlocked(uint32_t address, byte* data, uint32_t dataLength) {
-  uint32_t retCode;
-
-  if ((uint32_t)FLASH_START + address < IFLASH0_ADDR) {
-    flash_debug(2, "Flash write address too low\n");
-    return false;
-  }
-
-  if ((uint32_t)FLASH_START + address >= IFLASH1_ADDR + IFLASH1_SIZE) {
-    flash_debug(2, "Flash write address too high\n");
-    return false;
-  }
-
-  if ((((uint32_t)FLASH_START + address) & 3) != 0) {
-    flash_debug(2, "Flash start address must be on four byte boundary\n");
-    return false;
-  }
-
-  // If the flash address we're going to write is in the same segment as the code the CPU is executing, we need to disable interrupts,
-  // or the CPU will come to a grinding halt here. Of course, we must be sure we're not to overwrite the code with data.
-  bool needToDisableInterrupts = (address < IFLASH0_SIZE);
-  if (needToDisableInterrupts) {
-    noInterrupts();
-  }
-
-  // write data
-  retCode = flash_write((uint32_t)FLASH_START + address, data, dataLength, 1);
-
-  if (needToDisableInterrupts) {
-    interrupts();
-  }
-
-  if (retCode != FLASH_RC_OK) {
-    flash_debug(2, "Flash write failed\n");
-    return false;
-  }
-
-  return true;
-}
-
-boolean DueFlashStorage::write(byte* address, byte* data, uint32_t dataLength) {
-  uint32_t offset = getOffset(address);
-  return write(offset, data, dataLength);
-}

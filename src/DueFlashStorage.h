@@ -45,20 +45,44 @@ public:
 	// This returns the physical address of the free flash memory after the program. It is retrieved from the linker map.
 	// Writing to any address below the value returned by this function is likely going to corrupt the program memory and
 	// then crash the CPU.
-	byte* getFirstFreeBlock();
+	static byte* getFirstFreeBlock();
 
-	uint32_t getFlashSize() const {
-		return IFLASH0_SIZE + IFLASH1_SIZE;
+	static inline uint32_t getAvailableFlashSize() {
+		return IFLASH0_SIZE + IFLASH1_SIZE - (getFirstFreeBlock() - FLASH_START);
 	}
 
+	// Test if the given offset is within the freely available space in the Flash.
+	//
+	// We DO NOT permit overwriting any application code or data, so the first available 
+	// address offset would be (getFirstFreeBlock() - FLASH_START).
+	inline bool validateAddress(uint32_t address) const {
+    return validateAddress(address, 1);
+	}
+	// As the above, but also takes the given size/amount (to be written) into account.
+	bool validateAddress(uint32_t address, uint32_t dataLength) const;
+
 	// These write methods write a byte or a block to the given offset.
-	boolean write(uint32_t address, byte value);
-	boolean write(uint32_t address, byte* data, uint32_t dataLength);
-	boolean write_unlocked(uint32_t address, byte value);
-	boolean write_unlocked(uint32_t address, byte* data, uint32_t dataLength);
+	inline boolean write(uint32_t address, byte value) {
+		return write(address, &value, 1);
+	}
+	inline boolean write(uint32_t address, byte* data, uint32_t dataLength) {
+		return write(address, data, dataLength, true);
+	}
+
+	boolean write(uint32_t address, byte* data, uint32_t dataLength, bool with_locking);
+
+	inline boolean write_unlocked(uint32_t address, byte value) {
+		return write_unlocked(address, &value, 1);
+	}
+	inline boolean write_unlocked(uint32_t address, byte* data, uint32_t dataLength) {
+		return write(address, data, dataLength, false);
+	}
 
 	// This writes directly to the given address. It must be in flash.
-	boolean write(byte* address, byte* data, uint32_t dataLength);
+	inline boolean write(byte* address, byte* data, uint32_t dataLength) {
+    uint32_t offset = getOffset(address);
+    return write(offset, data, dataLength);
+  }
 };
 
 #endif
