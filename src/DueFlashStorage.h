@@ -55,11 +55,7 @@ public:
 	//
 	// We DO NOT permit overwriting any application code or data, so the first available
 	// address offset would be (getFirstFreeBlock() - FLASH_START).
-	inline bool validateAddress(uint32_t address) const {
-		return validateAddress(address, 1);
-	}
-	// As the above, but also takes the given size/amount (to be written) into account.
-	bool validateAddress(uint32_t address, uint32_t dataLength) const;
+	bool validateAddress(uint32_t address, uint32_t dataLength = 1) const;
 
 	// These write methods write a byte or a block to the given offset.
 	inline boolean write(uint32_t address, byte value) {

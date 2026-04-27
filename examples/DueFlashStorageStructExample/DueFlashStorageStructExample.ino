@@ -106,6 +106,7 @@ void loop() {
   Serial.println();
 
   /* change some values in the struct and write them back */
+
   // increment b by 1 (modulus 100 to start over at 0 when 100 is reached)
   cfg->b = (cfg->b + 1) % 100;
 
