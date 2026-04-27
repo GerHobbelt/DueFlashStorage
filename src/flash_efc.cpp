@@ -464,6 +464,51 @@ uint32_t flash_erase_sector(uint32_t ul_address)
 #endif
 
 /**
+ * \brief Compare the SRC and DST data buffers and report the type of difference.
+ *
+ * \note This function is similar to memcmp() but is specially geared towards use in
+ * flash programming: as flash bits can be 'overwritten' with a '0' value, they cannot
+ * be rewritten as '1': the latter change requires a flash ERASE cycle to reset the 
+ * bit value(s) to '1'.
+ *
+ * flash_memcmp(DST, SRC, SIZE) assumes DST is the flash target, while SRC is the new data
+ * to be written.
+ *
+ * \param p_dst_address   DST address.
+ * \param p_src_address   SRC / buffer address.
+ * \param size            Size of the data buffer in bytes.
+ *
+ * \return 0 if no changes were found between SRC and DST data.
+ * Return +1 when ALL changes discovered between SRC and DST are simple rewrite-1-as-0 bit changes,
+ * i.e. will not require a mandatory flash page erase to succeed.
+ * Return -1 when ANY of the changes discovered between SRC and DST do require a mandatory 
+ * flash page erase to succeed, due to a rewrite-0-as-1 bit change.
+ */
+int flash_memcmp(const uint8_t *p_dst_address, const uint8_t *p_src_address, uint32_t size)
+{
+  int state = 0;
+  while (size > 0) {
+    uint8_t dv = *p_dst_address++;
+    uint8_t sv = *p_src_address++;
+	uint8_t change = dv ^ sv;
+	if (change != 0) {
+	  // when any of the bits are 1 in the XOR result, then that implies change.
+	  // Now we need to find out if that change is 1->0 or 0->1:
+	  // if any of the changed bits start as '1' in DST we have the worst-case scenario: erase required.
+	  change &= dv;
+	  if (change != 0) {
+	    return -1;
+	  }
+	  // when the current byte does not require a mandatory erase cycle, that doesn't mean
+	  // any subsequent byte in the buffer may not require such, so we better make sure and scan
+	  // the remainder of the buffer, until we hit either the worst-case scenario or reach the end.
+	  state = 1;
+	}
+  }
+  return state;
+}
+
+/**
  * \brief Write a data buffer on flash.
  *
  * \note This function works in polling mode, and thus only returns when the
@@ -509,7 +554,7 @@ uint32_t flash_write(uint32_t ul_address, const void *p_buffer,
 		us_padding = IFLASH_PAGE_SIZE - us_offset - writeSize;
 
 		/* Check if the current data already matches the data to be written: if so, SKIP */
-		auto match = memcmp((const uint8_t *)ul_page_addr + us_offset, p_buffer, writeSize);
+		auto match = flash_memcmp((const uint8_t *)ul_page_addr + us_offset, p_buffer, writeSize);
 		if (match != 0) {
 			/* Pre-buffer data */
 			memcpy(puc_page_buffer, (void *)ul_page_addr, us_offset);
@@ -532,7 +577,7 @@ uint32_t flash_write(uint32_t ul_address, const void *p_buffer,
 				*p_aligned_dest++ = gs_ul_page_buffer[ul_idx];
 			}
 
-			if (ul_erase_flag) {
+			if (ul_erase_flag || (match < 0)) {
 				ul_error = efc_perform_command(p_efc, EFC_FCMD_EWP,
 						us_page);
 			} else {
