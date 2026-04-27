@@ -30,7 +30,8 @@ extern "C" unsigned char _erelocate;
 // an explanation of this function
 const byte* DueFlashStorage::getFirstFreeBlock() {
   const byte* rom_end = &_etext + (&_erelocate - &_srelocate);
-  rom_end = (const byte*)(((uint32_t)rom_end + 255) & ~0xFF);  // Align to next free flash block (even if the memory ends right on a boundary)
+  constexpr const uint32_t page_size_minus_1 = IFLASH1_PAGE_SIZE - 1;
+  rom_end = (const byte*)(((uint32_t)rom_end + page_size_minus_1) & ~page_size_minus_1);  // Align to next free flash block (even if the memory ends right on a boundary)
   return rom_end;
 }
 
