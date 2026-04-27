@@ -13,6 +13,13 @@ Note: The flash storage is reset every time you upload a new sketch to your Ardu
 
 Inspiration and some code from Pansenti at https://github.com/Pansenti/DueFlash
 
+
+## Changes to the original implementation:
+
+- The whole flash space can be addressed. Flash offset 0 is now the start of the first flash block, where the application resides. Therefore one must be **extra careful** not to overwrite the program in memory. Use the new `getFirstFreeBlock` function to retrieve the first block not used by the program. 
+- Added a new overload to write: `boolean write(byte* addres, byte* data, uin32_t dataLength)` that allows writing to addresses instead of offsets. 
+
+
 ## Install
 
 Create a new folder in your Arduino sketch folder named DueFlashStorage. 
