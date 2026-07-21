@@ -40,6 +40,8 @@ void setup() {
     b1++;
     dueFlashStorage.write8(0 * CHUNK_ADDR_OFFSET, b1);
   }
+
+  display_flash_debug_messages();
 }
 
 void loop() {
@@ -63,6 +65,8 @@ void loop() {
   dueFlashStorage.write8(2 * CHUNK_ADDR_OFFSET, i);
   
   Serial.println();
+
+  display_flash_debug_messages();
 
   static bool led_state = false;
   digitalWrite(LED_BUILTIN, led_state); 

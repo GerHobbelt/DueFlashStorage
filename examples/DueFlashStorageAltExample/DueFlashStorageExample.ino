@@ -44,6 +44,8 @@ void setup() {
     b1++;
     dueFlashStorage.write_at_addr(flash_data_address, b1);
   }
+
+  display_flash_debug_messages();
 }
 
 void loop() {
@@ -71,6 +73,8 @@ void loop() {
   dueFlashStorage.write_at_addr(const_cast<byte *>(flash_data_address), i);
   
   Serial.println();
+
+  display_flash_debug_messages();
 
   static bool led_state = false;
   digitalWrite(LED_BUILTIN, led_state); 

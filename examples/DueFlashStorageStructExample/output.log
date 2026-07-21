@@ -16,8 +16,8 @@ Found value at first data address: 0xFFFFFFFF
 Address is : 0x87500
 Is first start: yes
 Writing data to 0x87500
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
 Reading CFG from flash: 
 1
 a:22 b:0 bigInteger:1147483647 message:Hello world! (1147483647) c:s
@@ -25,32 +25,32 @@ a:22 b:0 bigInteger:1147483647 message:Hello world! (1147483647) c:s
 1
 1
 a:22 b:0 bigInteger:1147483647 message:Hello world! (1147483647) c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:0 bigInteger:1147483647 message:Hello world! (1147483647) c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:1 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:1 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
 
 
@@ -78,32 +78,32 @@ a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
 1
 1
 a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:3 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:3 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
 
 
@@ -131,32 +131,32 @@ a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
 1
 1
 a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:5 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:5 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
 
 
@@ -184,32 +184,32 @@ a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
 1
 1
 a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:7 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:7 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
 
 
@@ -237,31 +237,31 @@ a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
 1
 1
 a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:9 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 -----------------------------------------
 1
 1
 a:22 b:9 bigInteger:1147483647 message:Hello world! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash write sans erase failed; retrying with erase.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash write sans erase failed; retrying with erase.
 -----------------------------------------
 1
 1
 a:22 b:10 bigInteger:1147483647 message:Hello Arduino Due! c:s
-  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
-  debug level 1: Flash sector already contains matching data: skipping write operation.
+  flash [0] level 0: Must disable interrupts when writing to flash; this is done automatically.
+  flash [1] level 1: Flash sector already contains matching data: skipping write operation.
 Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
 

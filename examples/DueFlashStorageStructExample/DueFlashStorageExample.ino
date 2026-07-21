@@ -85,6 +85,8 @@ void setup() {
   Serial.print(", address @ offset 0 = 0x");
   Serial.println((intptr_t)flashStartAddress, HEX);
   
+  display_flash_debug_messages();
+
   delay(1000);
 
   const uint32_t* firstCall = (const uint32_t*)firstDataAddress;
@@ -109,9 +111,13 @@ void setup() {
     Serial.print("Writing data to 0x");
     Serial.println((intptr_t)firstDataAddress, HEX);
     dueFlashStorage.write_at_addr(const_cast<byte*>(firstDataAddress) + CFG_ADDR_OFFSET, configuration); // write config struct content to flash
+  
+    display_flash_debug_messages();
 
     // write 0 to address 0 to indicate that it is not the first time running anymore
     dueFlashStorage.write32(0, 0); 
+  
+    display_flash_debug_messages();
   }
   else {
     Serial.println("no");
@@ -137,6 +143,8 @@ void setup() {
   Serial.print(" c:");
   Serial.print(cfg.c);
   Serial.println();
+  
+  display_flash_debug_messages();
 
   Serial.println("===========================================");
 }
@@ -193,6 +201,8 @@ void loop() {
 
   // write configuration struct to flash at adress CFG_ADDR_OFFSET
   dueFlashStorage.write(CFG_ADDR_OFFSET, &cfg);
+  
+  display_flash_debug_messages();
 
   // halt after 5 rounds to prevent wearing out your flash quickly during these experiments...
   if (cnt < 5) {
