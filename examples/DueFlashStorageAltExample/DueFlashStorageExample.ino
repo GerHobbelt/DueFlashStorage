@@ -18,12 +18,6 @@ static void printPointer(const void *ptr) {
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
-#if 0
-  // wait for USB serial port to be connected - wait for pc program to open the serial port
-  SerialUSB.begin(250000 /* was: 115200 */ );    // Initialize Native USB port
-  while(!SerialUSB);
-#endif  
-
   Serial.begin(250000 /* was: 115200 */ );
   Serial.print("DueFlashStorage: flash address API overloads usage example ");
   Serial.print(__FILE__);
