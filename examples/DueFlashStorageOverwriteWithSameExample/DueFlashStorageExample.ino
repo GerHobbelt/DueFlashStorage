@@ -188,7 +188,7 @@ void setup() {
         if (current->is_more_recent_than(last_used)) {
           last_used = current;
         }
-        else if (current->is_older_than(oldest_used)) {
+        if (current->is_older_than(oldest_used)) {
           oldest_used = current;
         }
         valid_cnt++;
