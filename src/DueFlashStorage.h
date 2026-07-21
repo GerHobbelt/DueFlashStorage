@@ -18,11 +18,10 @@ Rewritten and modified by Sebastian Nilsson
 #include "flash_efc.h"
 #include "efc.h"
 
-// 1Kb of data
-#define DATA_LENGTH   ((IFLASH1_PAGE_SIZE / sizeof(byte)) * 4)
+#include <type_traits>
 
-// choose a start address that's offset to show that it doesn't have to be on a page boundary
-#define FLASH_START   ((byte*)IFLASH0_ADDR)
+// 1Kb of data
+#define DATA_LENGTH   ((IFLASH0_PAGE_SIZE / sizeof(byte)) * 4)
 
 //  DueFlash is the main class for flash functions
 class DueFlashStorage {
@@ -34,50 +33,118 @@ public:
 	// data is a pointer to the data to be written
 	// dataLength is length of data in bytes
 
-	byte read(uint32_t address);
+	byte read(uint32_t address) const;
+	uint16_t read16(uint32_t address) const;
+	uint32_t read32(uint32_t address) const;
+	uint64_t read64(uint32_t address) const;
+
+	// return dest_address on success or nullptr on failure.
+	byte *read(byte *dest_address, uint32_t dataLength, uint32_t flash_address) const;
+	byte *read(byte *dest_address, uint32_t dataLength, const byte *flash_address) const {
+		uint32_t offset = getOffset(flash_address);
+		return read(dest_address, dataLength, offset);
+	}
 
 	// This returns the physical address of the given flash offset. 0 returns the start of the flash (which is 0x80000 on the Due)
-	const byte* readAddress(uint32_t address);
+	const byte* readAddress(uint32_t address) const;
 
 	// Return the flash offset for the given physical address.
-	uint32_t getOffset(const byte* address);
+	uint32_t getOffset(const byte* address) const;
 
 	// This returns the physical address of the free flash memory after the program. It is retrieved from the linker map.
 	// Writing to any address below the value returned by this function is likely going to corrupt the program memory and
 	// then crash the CPU.
-	static const byte* getFirstFreeBlock();
+	const byte* getFirstFreeBlock();
 
-	static inline uint32_t getAvailableFlashSize() {
-		return IFLASH0_SIZE + IFLASH1_SIZE - (getFirstFreeBlock() - FLASH_START);
-	}
+	uint32_t getAvailableFlashSize();
 
 	// Test if the given offset is within the freely available space in the Flash.
 	//
 	// We DO NOT permit overwriting any application code or data, so the first available
 	// address offset would be (getFirstFreeBlock() - FLASH_START).
-	bool validateAddress(uint32_t address, uint32_t dataLength = 1) const;
+	bool validateAddress(uint32_t address, uint32_t dataLength = 1);
 
-	// These write methods write a byte or a block to the given offset.
-	inline boolean write(uint32_t address, byte value) {
-		return write(address, &value, 1);
+	// write a byte or a block to the given offset.
+    template <typename T,
+          typename std::enable_if<
+		    std::is_arithmetic<T>::value
+            && !(   std::is_reference<T>::value
+                 || std::is_pointer<T>::value),
+            bool
+          >::type = true
+      >
+	inline bool write(uint32_t address, T value) {
+		return write(address, (const byte *)&value, sizeof(T));
 	}
-	inline boolean write(uint32_t address, const byte* data, uint32_t dataLength) {
-		return write(address, data, dataLength, true);
+    template <typename T,
+          typename std::enable_if<
+		      !std::is_arithmetic<T>::value
+            && std::is_reference<T>::value,
+            bool
+          >::type = true
+      >
+	inline bool write(uint32_t address, const T &value) {
+		return write(address, (const byte *)&value, sizeof(T));
 	}
+    template <typename T,
+          typename std::enable_if<
+            std::is_pointer<T>::value,
+            bool
+          >::type = true
+      >
+	inline bool write(uint32_t address, const T *value) {
+		return write(address, (const byte *)value, sizeof(T));
+	}
+	bool write(uint32_t address, const byte* data, uint32_t dataLength, bool with_locking = true);
 
-	boolean write(uint32_t address, const byte* data, uint32_t dataLength, bool with_locking);
-
-	inline boolean write_unlocked(uint32_t address, byte value) {
-		return write_unlocked(address, &value, 1);
+	template<typename T>
+	inline bool write_unlocked(uint32_t address, T value) {
+		return write_unlocked(address, &value, sizeof(T));
 	}
-	inline boolean write_unlocked(uint32_t address, const byte* data, uint32_t dataLength) {
+	inline bool write_unlocked(uint32_t address, const byte* data, uint32_t dataLength) {
 		return write(address, data, dataLength, false);
 	}
 
-	// This writes directly to the given address. It must be in flash.
-	inline boolean write(byte* address, const byte* data, uint32_t dataLength) {
+    template <typename T,
+          typename std::enable_if<
+            !(   std::is_reference<T>::value
+              || std::is_pointer<T>::value),
+            bool
+          >::type = true
+      >
+	inline bool write2addr(byte* address, T value) {
+		return write2addr(address, (const byte *)&value, sizeof(T));
+	}
+    template <typename T,
+          typename std::enable_if<
+            std::is_reference<T>::value,
+            bool
+          >::type = true
+      >
+	inline bool write2addr(byte* address, const T &value) {
+		return write2addr(address, (const byte *)&value, sizeof(T));
+	}
+    template <typename T,
+          typename std::enable_if<
+            std::is_pointer<T>::value,
+            bool
+          >::type = true
+      >
+	inline bool write2addr(byte* address, const T *value) {
+		return write2addr(address, (const byte *)value, sizeof(T));
+	}
+	inline bool write2addr(byte* address, const byte* data, uint32_t dataLength, bool with_locking = true) {
 		uint32_t offset = getOffset(address);
-		return write(offset, data, dataLength);
+		return write(offset, data, dataLength, with_locking);
+	}
+
+	template<typename T>
+	inline bool write2addr_unlocked(byte *address, T value) {
+		return write2addr_unlocked(address, &value, sizeof(T));
+	}
+	inline bool write2addr_unlocked(byte* address, const byte* data, uint32_t dataLength) {
+		uint32_t offset = getOffset(address);
+		return write_unlocked(offset, data, dataLength);
 	}
 };
 
