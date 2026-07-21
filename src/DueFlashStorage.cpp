@@ -43,17 +43,6 @@ uint64_t DueFlashStorage::read64_at_addr(const byte *address) {
 
 // return dest_address on success or nullptr on failure.
 byte *DueFlashStorage::read_at_addr(byte *dest_address, uint32_t dataLength, const byte* flash_address) {
-
-  Serial.print("DueFlashStorage::");
-  Serial.print(__FUNCTION__);
-  Serial.print("(");
-  Serial.print((intptr_t)dest_address, HEX);
-  Serial.print(",");
-  Serial.print(dataLength);
-  Serial.print(",");
-  Serial.print((intptr_t)flash_address, HEX);
-  Serial.println(")");
-
   memcpy(dest_address, flash_address, dataLength);
   return dest_address;
 }
@@ -112,18 +101,6 @@ bool DueFlashStorage::validateAddress_at_addr(const byte* address, uint32_t data
 
 bool DueFlashStorage::write_at_addr(byte* address, const byte* data, uint32_t dataLength, bool with_locking) {
   uint32_t retCode;
-
-  Serial.print("DueFlashStorage::");
-  Serial.print(__FUNCTION__);
-  Serial.print("(");
-  Serial.print((intptr_t)address, HEX);
-  Serial.print(",");
-  Serial.print((intptr_t)data, HEX);
-  Serial.print(",");
-  Serial.print(dataLength);
-  Serial.print(",");
-  Serial.print(with_locking);
-  Serial.println(")");
 
   if (!validateAddress_at_addr(address, dataLength)) {
     return false;
@@ -192,7 +169,7 @@ bool DueFlashStorage::write_at_addr(byte* address, const byte* data, uint32_t da
 extern "C"
 WEAK 
 void flash_debug(int level, const char *message) {
-  Serial.print("DueFlashDebug: level ");
+  Serial.print("  DueFlashDebug: level ");
   Serial.print(level);
   Serial.print(": ");
   Serial.print(message);

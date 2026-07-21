@@ -133,10 +133,6 @@ public:
           >::type = true
       >
 	inline bool write(uint32_t address, const T value) {
-	  Serial.print("::: sizeof:");
-	  Serial.print(sizeof(T));
-	  Serial.println();
-
 		return write(address, (const byte *)&value, sizeof(T));
 	}
     template <typename T,
@@ -147,25 +143,13 @@ public:
           >::type = true
       >
 	inline bool write(uint32_t address, const T &value) {
-	  Serial.print("&&& sizeof:");
-	  Serial.print(sizeof(T));
-	  Serial.println();
-
 	  return write(address, (const byte *)&value, sizeof(T));
 	}
     template <typename T>
 	inline bool write(uint32_t address, const T *value) {
-	  Serial.print(">>> sizeof:");
-	  Serial.print(sizeof(T));
-	  Serial.println();
-
 	  return write(address, (const byte *)value, sizeof(T));
 	}
 	inline bool write(uint32_t address, const byte* data, uint32_t dataLength, bool with_locking = true) {
-	  Serial.print(">>> dataLength:");
-	  Serial.print(dataLength);
-	  Serial.println();
-
 	  byte *ptr = const_cast<byte *>(readAddress(address));
 	  return write_at_addr(ptr, data, dataLength, with_locking);
 	}
