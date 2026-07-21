@@ -25,7 +25,6 @@ Configuration configuration;
 
 void setup() {
   Serial.begin(250000 /* was: 115200 */ );
-  //delay(500);
   while (!Serial)
     ;
 
@@ -173,7 +172,7 @@ void loop() {
   Serial.println();
 
   /* change some values in the struct and write them back */
-  /* only do these edits on EVEN rounds... */
+  /* only do these edits on EVEN rounds: the ODD rounds still will attempt to write, but the flash library should recognize the fact that nothing has changed and thus optimize out that write action, reducing flash wear ==> longer hardware life/MTBF! */
   static int cnt = 0;
   cnt++;
 
