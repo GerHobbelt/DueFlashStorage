@@ -27,8 +27,22 @@ uint64_t DueFlashStorage::read64(uint32_t address) {
   return *((const uint64_t *)readAddress(address));
 }
 
+byte DueFlashStorage::read8_at_addr(const byte *address) {
+  return *address;
+}
+
+uint16_t DueFlashStorage::read16_at_addr(const byte *address) {
+  return *((const uint16_t *)address);
+}
+uint32_t DueFlashStorage::read32_at_addr(const byte *address) {
+  return *((const uint32_t *)address);
+}
+uint64_t DueFlashStorage::read64_at_addr(const byte *address) {
+  return *((const uint64_t *)address);
+}
+
 // return dest_address on success or nullptr on failure.
-byte *DueFlashStorage::read(byte *dest_address, uint32_t dataLength, const byte* flash_address) {
+byte *DueFlashStorage::read_at_addr(byte *dest_address, uint32_t dataLength, const byte* flash_address) {
 
   Serial.print("DueFlashStorage::");
   Serial.print(__FUNCTION__);
@@ -69,7 +83,7 @@ uint32_t DueFlashStorage::getAvailableFlashSize() {
     return IFLASH0_SIZE + IFLASH1_SIZE - (getFirstFreeBlock() - FLASH_START);
 }
 
-bool DueFlashStorage::validateAddress(const byte* address, uint32_t dataLength) {
+bool DueFlashStorage::validateAddress_at_addr(const byte* address, uint32_t dataLength) {
 
 #if 01
   if (address < getFirstFreeBlock()) {
@@ -96,7 +110,7 @@ bool DueFlashStorage::validateAddress(const byte* address, uint32_t dataLength) 
   return true;
 }
 
-bool DueFlashStorage::write2addr(byte* address, const byte* data, uint32_t dataLength, bool with_locking) {
+bool DueFlashStorage::write_at_addr(byte* address, const byte* data, uint32_t dataLength, bool with_locking) {
   uint32_t retCode;
 
   Serial.print("DueFlashStorage::");
@@ -111,15 +125,15 @@ bool DueFlashStorage::write2addr(byte* address, const byte* data, uint32_t dataL
   Serial.print(with_locking);
   Serial.println(")");
 
-  if (!validateAddress(address, dataLength)) {
+  if (!validateAddress_at_addr(address, dataLength)) {
     return false;
   }
 
   if (address < FLASH_START + IFLASH0_SIZE && address + dataLength > FLASH_START + IFLASH0_SIZE) {
     // A write across the boundary of the flash pages requires two calls
     const uint32_t lowerSize = FLASH_START + IFLASH0_SIZE - address;
-    bool ret = write2addr(address, data, lowerSize, with_locking);
-    ret &= write2addr(FLASH_START + IFLASH0_SIZE, data + lowerSize, dataLength - lowerSize, with_locking);
+    bool ret = write_at_addr(address, data, lowerSize, with_locking);
+    ret &= write_at_addr(FLASH_START + IFLASH0_SIZE, data + lowerSize, dataLength - lowerSize, with_locking);
     return ret;
   }
 
@@ -175,6 +189,7 @@ bool DueFlashStorage::write2addr(byte* address, const byte* data, uint32_t dataL
 
 // ----------------------------------------------------------------------------------------------------
 
+extern "C"
 WEAK 
 void flash_debug(int level, const char *message) {
   Serial.print("DueFlashDebug: level ");
