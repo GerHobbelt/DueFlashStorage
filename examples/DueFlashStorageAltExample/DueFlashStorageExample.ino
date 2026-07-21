@@ -90,13 +90,34 @@ void loop() {
 
 // --------------------
 
+#pragma pack(push, 1)
+struct FlashDebugMessageStore {
+  uint8_t depth;
+  int8_t level[3];
+  const char *message[3];
+} flash_debug_msg_store{0, {}, {}};
+
 // non-weak: this one overrides the default debug output function in the library
 extern "C"
 void flash_debug(int level, const char *message) {
-  Serial.print("  debug level ");
-  Serial.print(level);
-  Serial.print(": ");
-  Serial.print(message);
-  Serial.println();
+  uint8_t d = flash_debug_msg_store.depth;
+  if (d < 3) {
+    flash_debug_msg_store.level[d] = level;
+    flash_debug_msg_store.message[d] = message;
+    flash_debug_msg_store.depth = d + 1;
+  }
 }
 
+void display_flash_debug_messages() {
+  uint8_t d = flash_debug_msg_store.depth;
+  for (uint8_t i = 0; i < d; i++) {
+    Serial.print("  flash [");
+    Serial.print((int)i);
+    Serial.print("] level ");
+    Serial.print((int)flash_debug_msg_store.level[i]);
+    Serial.print(": ");
+    Serial.print(flash_debug_msg_store.message[i]);
+    Serial.println();
+  }
+  flash_debug_msg_store.depth = 0;
+}
