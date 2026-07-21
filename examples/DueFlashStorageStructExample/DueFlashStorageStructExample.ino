@@ -1,7 +1,12 @@
 /* This example will write a struct to memory which is a very convinient way of storing configuration parameters.
  Try resetting the Arduino Due or unplug the power to it. The values will stay stored. */
 
+#if 0
 #include <DueFlashStorage.h>
+#else
+#include "src/DueFlashStorage.h"
+#endif
+
 DueFlashStorage dueFlashStorage;
 
 // The struct of the configuration.
@@ -9,7 +14,7 @@ struct Configuration {
   uint32_t a;
   uint32_t b;
   int32_t bigInteger;
-  char* message;
+  const char* message;
   char c;
 };
 
@@ -17,48 +22,70 @@ struct Configuration {
 Configuration configuration;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(250000 /* was: 115200 */ );
   delay(500);
 
   /* Flash is erased every time new code is uploaded. Write the default configuration to flash if first time */
   // running for the first time?
   uint8_t codeRunningForTheFirstTime = dueFlashStorage.read(0); // flash bytes will be 255 at first run
   Serial.print("Flash start: 0x");
+  Serial.println(codeRunningForTheFirstTime, HEX);
 
-  byte* startAddr = dueFlashStorage.readAddress(0);
+  const byte* startAddr = dueFlashStorage.readAddress(0);
   Serial.println((unsigned int)startAddr, HEX);
-  int bytes = 0;
-  while (bytes < 512 * 1024)
-  {
-    int* data = (int*)(startAddr + bytes);
-    if (*data == 0xFFFFFFFF)
-     {
-     Serial.print("Free block at 0x");
-     Serial.println((unsigned int)data, HEX);
-     }
-     else
-     {
-      Serial.print("Used block at 0x");
-     Serial.println((unsigned int)data, HEX);
-     }
-    bytes+=512;
-  }
+  Serial.println();
 
-  byte* firstDataAddress = dueFlashStorage.getFirstFreeBlock();
-  byte* flashStartAddress = dueFlashStorage.readAddress(0);
+  int bytes = 0;
+  const uint32_t* section_start_address = NULL;
+  uint32_t section_count = 0;
+  bool section_is_free = false;
+  for (;;)
+  {
+    bool the_end = (bytes >= 512 * 1024);
+    const uint32_t* data = (const uint32_t*)(startAddr + bytes);
+    bool is_free_block = !the_end && (data[0] == 0xFFFFFFFF && data[1] == 0xFFFFFFFF && data[2] == 0xFFFFFFFF && data[3] == 0xFFFFFFFF);
+    if (section_is_free != is_free_block || section_count == 0 || the_end) {
+      if (section_count > 0) {
+        Serial.print(section_count);
+        Serial.print(is_free_block ? " used" : " free");
+        Serial.print(" blocks at 0x");
+        Serial.print((intptr_t)section_start_address, HEX);
+        // Flash page is locked
+        Serial.print("..0x");
+        Serial.println((intptr_t)(data - 1), HEX);
+      }
+      section_is_free = is_free_block;
+      section_count = 1;
+      section_start_address = data;
+    }
+    else {
+      section_count++;
+    }
+
+    if (the_end)
+      break;
+
+    bytes += 512;
+  }
+  Serial.println();
+
+  const byte* firstDataAddress = dueFlashStorage.getFirstFreeBlock();
+  const byte* flashStartAddress = dueFlashStorage.readAddress(0);
 
   Serial.print("First free block is at: 0x");
-  Serial.println((uint32_t)firstDataAddress, HEX);
+  Serial.print((intptr_t)firstDataAddress, HEX);
+  Serial.print(", address @ offset 0 = 0x");
+  Serial.println((intptr_t)flashStartAddress, HEX);
   
   delay(2000);
-  int* firstCall = (int*)firstDataAddress;
-  int startContent = *firstCall;
-  Serial.print("Found value at first data address: ");
-  Serial.println(startContent);
-  Serial.print("Address is : ");
-  Serial.println((uint32_t)firstDataAddress, HEX);
+  const uint32_t* firstCall = (const uint32_t*)firstDataAddress;
+  uint32_t startContent = *firstCall;
+  Serial.print("Found value at first data address: 0x");
+  Serial.println(startContent, HEX);
+  Serial.print("Address is : 0x");
+  Serial.println((intptr_t)firstDataAddress, HEX);
   Serial.print("Is first start: ");
-  if (*firstCall == -1) 
+  if (*firstCall == 0xFFFFFFFF) 
   {
     Serial.println("yes");
     delay(1000);
@@ -70,22 +97,26 @@ void setup() {
     configuration.c = 's';
 
     // write configuration struct to flash at adress 4
-    byte b2[sizeof(Configuration)]; // create byte array to store the struct
-    memcpy(b2, &configuration, sizeof(Configuration)); // copy the struct to the byte array
     Serial.print("Writing data to 0x");
-    Serial.println((uint32_t)firstDataAddress, HEX);
-    dueFlashStorage.write(firstDataAddress + 4, b2, sizeof(Configuration)); // write byte array to flash
+    Serial.println((intptr_t)firstDataAddress, HEX);
+    dueFlashStorage.write(const_cast<byte*>(firstDataAddress) + 4, &configuration, sizeof(Configuration)); // write config struct content to flash
 
     // write 0 to address 0 to indicate that it is not the first time running anymore
-    dueFlashStorage.write(firstDataAddress, 0, sizeof(uint32_t)); 
+    dueFlashStorage.write(0, 0, sizeof(uint32_t)); 
   }
   else {
     Serial.println("no");
   }
 }
 
+static bool streq(const char *s1, const char *s2) {
+  if (!s1 || !s2)
+    return false;
+  return strcmp(s1, s2) == 0;
+}
+
 void loop() {
-  byte* firstDataAddress = dueFlashStorage.getFirstFreeBlock();
+  const byte* firstDataAddress = dueFlashStorage.getFirstFreeBlock();
   Configuration* cfg = (Configuration*)(firstDataAddress + 4);
 
   // print the content
@@ -111,14 +142,36 @@ void loop() {
   cfg->b = (cfg->b + 1) % 100;
 
   // change the message
-  String message = cfg->message;
-  if (cfg->message == "Hello world!")
+  if (streq(cfg->message, "Hello world!"))
     cfg->message = "Hello Arduino Due!";
   else
     cfg->message = "Hello world!";
 
   // write configuration struct to flash at adress 4
-  dueFlashStorage.write(4, cfg, sizeof(Configuration));
+  dueFlashStorage.write(4, (const byte *)cfg, sizeof(Configuration));
 
-  delay(1000);
+  {
+    static int cnt = 0;
+    cnt++;
+
+    if (cnt < 5) {
+      delay(1000);
+    }
+    else {
+      Serial.println("Halting...");
+      while (1) ;
+    }
+  }
 }
+
+// --------------------
+
+// non-weak: this one overrides the default debug output function in the library
+void flash_debug(int level, const char *message) {
+  Serial.print("level = ");
+  Serial.print(level);
+  Serial.print(": ");
+  Serial.print(message);
+  Serial.println();
+}
+
