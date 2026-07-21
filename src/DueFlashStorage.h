@@ -29,27 +29,52 @@ public:
 	DueFlashStorage();
 
 	// write() writes the specified amount of data into flash.
-	// address is the offset from the flash start where the write should start
+	// address is the offset from the start of 'available space' 
+	// as specified by `getFirstFreeBlock()`.
 	// data is a pointer to the data to be written
 	// dataLength is length of data in bytes
 
-	byte read(uint32_t address) const;
-	uint16_t read16(uint32_t address) const;
-	uint32_t read32(uint32_t address) const;
-	uint64_t read64(uint32_t address) const;
+	byte read8(uint32_t address);
+	uint16_t read16(uint32_t address);
+	uint32_t read32(uint32_t address);
+	uint64_t read64(uint32_t address);
 
-	// return dest_address on success or nullptr on failure.
-	byte *read(byte *dest_address, uint32_t dataLength, uint32_t flash_address) const;
-	byte *read(byte *dest_address, uint32_t dataLength, const byte *flash_address) const {
-		uint32_t offset = getOffset(flash_address);
-		return read(dest_address, dataLength, offset);
+    template <typename T>
+	inline byte *read(T *dest, uint32_t flash_address) {
+	  const byte *ptr = readAddress(flash_address);
+  	  return read((byte *)dest, sizeof(T), ptr);
 	}
 
-	// This returns the physical address of the given flash offset. 0 returns the start of the flash (which is 0x80000 on the Due)
-	const byte* readAddress(uint32_t address) const;
+    template <typename T>
+	inline byte *read(T &dest, uint32_t flash_address) {
+	  const byte *ptr = readAddress(flash_address);
+  	  return read((byte *)&dest, sizeof(T), ptr);
+	}
+
+    template <typename T>
+	inline byte *read(T *dest, const byte* flash_address) {
+  	  return read((byte *)dest, sizeof(T), flash_address);
+	}
+
+    template <typename T>
+	inline byte *read(T &dest, const byte* flash_address) {
+  	  return read((byte *)&dest, sizeof(T), flash_address);
+	}
+
+	// return dest_address on success or nullptr on failure.
+	byte *read(byte *dest_address, uint32_t dataLength, uint32_t flash_address) {
+	  const byte *ptr = readAddress(flash_address);
+  	  return read(dest_address, dataLength, ptr);
+	}
+	byte *read(byte *dest_address, uint32_t dataLength, const byte *flash_address);
+
+	// This returns the physical address of the given flash offset. 
+	// 0 returns the start of the available data space in the flash, as produced by
+	// `getFirstFreeBlock()`.
+	const byte* readAddress(uint32_t address);
 
 	// Return the flash offset for the given physical address.
-	uint32_t getOffset(const byte* address) const;
+	uint32_t getOffset(const byte* address);
 
 	// This returns the physical address of the free flash memory after the program. It is retrieved from the linker map.
 	// Writing to any address below the value returned by this function is likely going to corrupt the program memory and
@@ -61,45 +86,95 @@ public:
 	// Test if the given offset is within the freely available space in the Flash.
 	//
 	// We DO NOT permit overwriting any application code or data, so the first available
-	// address offset would be (getFirstFreeBlock() - FLASH_START).
-	bool validateAddress(uint32_t address, uint32_t dataLength = 1);
+	// address offset would be (getFirstFreeBlock() i.e. 0).
+	bool validateAddress(const byte* address, uint32_t dataLength = 1);
+	bool validateAddress(uint32_t address, uint32_t dataLength = 1) {
+	  const byte *ptr = readAddress(address);
+	  return validateAddress(ptr, dataLength);
+	}
+
+	inline bool write8(uint32_t address, byte value) {
+	  return write(address, value);
+	}
+	inline bool write16(uint32_t address, uint16_t value) {
+	  return write(address, value);
+	}
+	inline bool write32(uint32_t address, uint32_t value) {
+	  return write(address, value);
+	}
+	inline bool write64(uint32_t address, uint64_t value) {
+	  return write(address, value);
+	}
 
 	// write a byte or a block to the given offset.
     template <typename T,
           typename std::enable_if<
 		    std::is_arithmetic<T>::value
-            && !(   std::is_reference<T>::value
-                 || std::is_pointer<T>::value),
+		    && !std::is_pointer<T>::value,
             bool
           >::type = true
       >
-	inline bool write(uint32_t address, T value) {
+	inline bool write(uint32_t address, const T value) {
+	  Serial.print("::: sizeof:");
+	  Serial.print(sizeof(T));
+	  Serial.println();
+
 		return write(address, (const byte *)&value, sizeof(T));
 	}
     template <typename T,
           typename std::enable_if<
-		      !std::is_arithmetic<T>::value
-            && std::is_reference<T>::value,
+		    !std::is_arithmetic<T>::value
+		    && !std::is_pointer<T>::value,
             bool
           >::type = true
       >
 	inline bool write(uint32_t address, const T &value) {
-		return write(address, (const byte *)&value, sizeof(T));
+	  Serial.print("&&& sizeof:");
+	  Serial.print(sizeof(T));
+	  Serial.println();
+
+	  return write(address, (const byte *)&value, sizeof(T));
 	}
+    template <typename T>
+	inline bool write(uint32_t address, const T *value) {
+	  Serial.print(">>> sizeof:");
+	  Serial.print(sizeof(T));
+	  Serial.println();
+
+	  return write(address, (const byte *)value, sizeof(T));
+	}
+	inline bool write(uint32_t address, const byte* data, uint32_t dataLength, bool with_locking = true) {
+	  Serial.print(">>> dataLength:");
+	  Serial.print(dataLength);
+	  Serial.println();
+
+	  byte *ptr = const_cast<byte *>(readAddress(address));
+	  return write2addr(ptr, data, dataLength, with_locking);
+	}
+
     template <typename T,
           typename std::enable_if<
-            std::is_pointer<T>::value,
+		    std::is_arithmetic<T>::value
+		    && !std::is_pointer<T>::value,
             bool
           >::type = true
       >
-	inline bool write(uint32_t address, const T *value) {
-		return write(address, (const byte *)value, sizeof(T));
+	inline bool write_unlocked(uint32_t address, const T value) {
+		return write_unlocked(address, (const byte *)&value, sizeof(T));
 	}
-	bool write(uint32_t address, const byte* data, uint32_t dataLength, bool with_locking = true);
-
-	template<typename T>
-	inline bool write_unlocked(uint32_t address, T value) {
-		return write_unlocked(address, &value, sizeof(T));
+    template <typename T,
+          typename std::enable_if<
+		    !std::is_arithmetic<T>::value
+		    && !std::is_pointer<T>::value,
+            bool
+          >::type = true
+      >
+	inline bool write_unlocked(uint32_t address, const T &value) {
+		return write_unlocked(address, (const byte *)&value, sizeof(T));
+	}
+    template <typename T>
+	inline bool write_unlocked(uint32_t address, const T *value) {
+		return write_unlocked(address, (const byte *)value, sizeof(T));
 	}
 	inline bool write_unlocked(uint32_t address, const byte* data, uint32_t dataLength) {
 		return write(address, data, dataLength, false);
@@ -107,8 +182,8 @@ public:
 
     template <typename T,
           typename std::enable_if<
-            !(   std::is_reference<T>::value
-              || std::is_pointer<T>::value),
+		    std::is_arithmetic<T>::value
+		    && !std::is_pointer<T>::value,
             bool
           >::type = true
       >
@@ -117,34 +192,46 @@ public:
 	}
     template <typename T,
           typename std::enable_if<
-            std::is_reference<T>::value,
+		    !std::is_arithmetic<T>::value
+		    && !std::is_pointer<T>::value,
             bool
           >::type = true
       >
 	inline bool write2addr(byte* address, const T &value) {
 		return write2addr(address, (const byte *)&value, sizeof(T));
 	}
-    template <typename T,
-          typename std::enable_if<
-            std::is_pointer<T>::value,
-            bool
-          >::type = true
-      >
+    template <typename T>
 	inline bool write2addr(byte* address, const T *value) {
 		return write2addr(address, (const byte *)value, sizeof(T));
 	}
-	inline bool write2addr(byte* address, const byte* data, uint32_t dataLength, bool with_locking = true) {
-		uint32_t offset = getOffset(address);
-		return write(offset, data, dataLength, with_locking);
-	}
+	bool write2addr(byte* address, const byte* data, uint32_t dataLength, bool with_locking = true);
 
-	template<typename T>
-	inline bool write2addr_unlocked(byte *address, T value) {
-		return write2addr_unlocked(address, &value, sizeof(T));
+    template <typename T,
+          typename std::enable_if<
+		    std::is_arithmetic<T>::value
+		    && !std::is_pointer<T>::value,
+            bool
+          >::type = true
+      >
+	inline bool write2addr_unlocked(byte* address, T value) {
+		return write2addr_unlocked(address, (const byte *)&value, sizeof(T));
+	}
+    template <typename T,
+          typename std::enable_if<
+		    !std::is_arithmetic<T>::value
+		    && !std::is_pointer<T>::value,
+            bool
+          >::type = true
+      >
+	inline bool write2addr_unlocked(byte* address, const T &value) {
+		return write2addr_unlocked(address, (const byte *)&value, sizeof(T));
+	}
+    template <typename T>
+	inline bool write2addr_unlocked(byte* address, const T *value) {
+		return write2addr_unlocked(address, (const byte *)value, sizeof(T));
 	}
 	inline bool write2addr_unlocked(byte* address, const byte* data, uint32_t dataLength) {
-		uint32_t offset = getOffset(address);
-		return write_unlocked(offset, data, dataLength);
+		return write2addr(address, data, dataLength, false);
 	}
 };
 
