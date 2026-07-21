@@ -8,43 +8,67 @@
 #endif
 #include <string>
 
-DueFlashStorage dueFlashStorage;
+#if 01
+#define CHUNK_ADDR_OFFSET    16   /* we use 16 to show that the first writes don't need an erase beforehand due to the 128-bit distance from the previous value chunk now (16 = 128/8). */
+#else
+#define CHUNK_ADDR_OFFSET    1
+#endif
 
-static void printPointer(const void *ptr) {
-  Serial.print("0x");
-  Serial.print((intptr_t)ptr, 16);
-}
+DueFlashStorage dueFlashStorage;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   Serial.begin(250000 /* was: 115200 */ );
-  Serial.print("DueFlashStorage: flash address API overloads usage example ");
-  Serial.print(__FILE__);
+  while (!Serial)
+    ;
+
+  Serial.print("\n\n\n\nDueFlashStorage: flash address API overloads usage example ");
+  Serial.println(__FILE__);
   Serial.println();
   Serial.println();
 
-  auto* flash_data_address = dueFlashStorage.getFirstFreeBlock();
+  byte* flash_data_address = const_cast<byte *>(dueFlashStorage.getFirstFreeBlock());
 
-  byte b1 = 3;
-  uint8_t b2 = 1;
-  dueFlashStorage.write(flash_data_address + 0, b1);
-  dueFlashStorage.write(flash_data_address + 1, b2);
-  dueFlashStorage.write(flash_data_address + 2, b2);
+  byte b1 = dueFlashStorage.read8(0);
+  if (b1 == 0xFF) {
+    b1 = 1;
+    uint8_t b2 = 100;
+    dueFlashStorage.write_at_addr(flash_data_address, b1);  // address 0
+    flash_data_address += CHUNK_ADDR_OFFSET;
+    dueFlashStorage.write_at_addr(flash_data_address, b2);  // address 16 ~ 1
+    flash_data_address += CHUNK_ADDR_OFFSET;
+    dueFlashStorage.write_at_addr(flash_data_address, b2);  // address 32 ~ 2
+  }
+  else {
+    b1++;
+    dueFlashStorage.write_at_addr(flash_data_address, b1);
+  }
 }
 
 void loop() {
+  const byte* flash_data_address = dueFlashStorage.getFirstFreeBlock();
+
   // read from flash at 'data space' address 0 and 1 and print them
   Serial.print("0:");
-  Serial.print(dueFlashStorage.read(flash_data_address + 0));
+  Serial.print(dueFlashStorage.read8_at_addr(flash_data_address));
+  flash_data_address += CHUNK_ADDR_OFFSET;
   Serial.print(" 1:");
-  Serial.print(dueFlashStorage.read(flash_data_address + 1));  
-  
+  Serial.print(dueFlashStorage.read8_at_addr(flash_data_address));  
+  flash_data_address += CHUNK_ADDR_OFFSET;
+
+  /* only do the next edit on EVEN rounds: the ODD rounds still will attempt to write, but the flash library should recognize the fact that nothing has changed and thus optimize out that write action, reducing flash wear ==> longer hardware life/MTBF! */
+  static int cnt = 0;
+  cnt++;
+
   // read from address 2, increment it, print and then write incremented value back to flash storage
-  uint8_t i = dueFlashStorage.read(flash_data_address + 2) + 1;
+  uint8_t i = dueFlashStorage.read8_at_addr(flash_data_address);
+  if (cnt % 2 == 0) {
+    i++;
+  }
   Serial.print(" 2:");
-  Serial.print(dueFlashStorage.read(flash_data_address + 2)); 
-  dueFlashStorage.write(flash_data_address + 2, i);
+  Serial.print(dueFlashStorage.read8_at_addr(flash_data_address)); 
+  dueFlashStorage.write_at_addr(const_cast<byte *>(flash_data_address), i);
   
   Serial.println();
 
@@ -53,25 +77,23 @@ void loop() {
   led_state = !led_state;
 
   // halt after 5 rounds to prevent wearing out your flash quickly during these experiments...
-  {
-    static int cnt = 0;
-    cnt++;
-
-    if (cnt < 5) {
-      delay(1000);
-    }
-    else {
-      Serial.println("Halting...");
-      while (1) ;
-    }
+  if (cnt < 5) {
+    delay(1000);
   }
+  else {
+    Serial.println("Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)\n");
+    while (1) ;
+  }
+
+  Serial.println("-----------------------------------------");
 }
 
 // --------------------
 
 // non-weak: this one overrides the default debug output function in the library
+extern "C"
 void flash_debug(int level, const char *message) {
-  Serial.print("level = ");
+  Serial.print("  debug level ");
   Serial.print(level);
   Serial.print(": ");
   Serial.print(message);

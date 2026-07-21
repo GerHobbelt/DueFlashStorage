@@ -23,8 +23,8 @@ void setup() {
   while (!Serial)
     ;
 
-  Serial.print("\n\n\n\n\nDueFlashStorage: example ");
-  Serial.print(__FILE__);
+  Serial.print("\n\n\n\n\nDueFlashStorage: basic flash read/write API usage example ");
+  Serial.println(__FILE__);
   Serial.println();
   Serial.println();
 
@@ -43,7 +43,7 @@ void setup() {
 }
 
 void loop() {
-  // read from flash at address 0 and 1 and print them
+  // read from flash at 'data space' address 0 and 1 and print them
   Serial.print("0:");
   Serial.print(dueFlashStorage.read8(0));
   Serial.print(" 1:");
@@ -83,8 +83,9 @@ void loop() {
 // --------------------
 
 // non-weak: this one overrides the default debug output function in the library
+extern "C"
 void flash_debug(int level, const char *message) {
-  Serial.print("debug level ");
+  Serial.print("  debug level ");
   Serial.print(level);
   Serial.print(": ");
   Serial.print(message);

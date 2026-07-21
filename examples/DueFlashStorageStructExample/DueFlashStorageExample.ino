@@ -13,25 +13,29 @@ DueFlashStorage dueFlashStorage;
 
 // The struct of the configuration.
 struct Configuration {
-  uint32_t a;
-  uint32_t b;
-  int32_t bigInteger;
-  const char* message;
-  char c;
+  uint32_t a{0};
+  uint32_t b{0};
+  int32_t bigInteger{0};
+  const char* message{nullptr};
+  char c{'?'};
 };
 
-// initialize one struct
-Configuration configuration;
-
 void setup() {
+  // initialize one struct
+  Configuration configuration;
+  
   Serial.begin(250000 /* was: 115200 */ );
   while (!Serial)
     ;
 
+  Serial.print("\n\n\n\n\nDueFlashStorage: reading/writing a config struct from/to flash example ");
+  Serial.println(__FILE__);
+
   /* Flash is erased every time new code is uploaded. Write the default configuration to flash if first time */
+  
   // running for the first time?
   uint32_t codeRunningForTheFirstTime = dueFlashStorage.read32(0); // flash bytes will be 255 at first run
-  Serial.print("\n\n\n\n\nFlash start: 0x");
+  Serial.print("\n\nFlash start: 0x");
   Serial.println(codeRunningForTheFirstTime, HEX);
 
   const byte* startAddr = dueFlashStorage.readAddress(0);
@@ -104,7 +108,7 @@ void setup() {
     // write configuration struct to flash at adress 4
     Serial.print("Writing data to 0x");
     Serial.println((intptr_t)firstDataAddress, HEX);
-    dueFlashStorage.write2addr(const_cast<byte*>(firstDataAddress) + CFG_ADDR_OFFSET, configuration); // write config struct content to flash
+    dueFlashStorage.write_at_addr(const_cast<byte*>(firstDataAddress) + CFG_ADDR_OFFSET, configuration); // write config struct content to flash
 
     // write 0 to address 0 to indicate that it is not the first time running anymore
     dueFlashStorage.write32(0, 0); 
@@ -205,8 +209,9 @@ void loop() {
 // --------------------
 
 // non-weak: this one overrides the default debug output function in the library
+extern "C"
 void flash_debug(int level, const char *message) {
-  Serial.print("debug level ");
+  Serial.print("  debug level ");
   Serial.print(level);
   Serial.print(": ");
   Serial.print(message);
