@@ -93,13 +93,13 @@ void setup() {
     configuration.a = 22;
     configuration.b = 0;
     configuration.bigInteger = 1147483647; // my lucky number
-    configuration.message = "Hello world!";
+    configuration.message = "Hello world! (1147483647)";
     configuration.c = 's';
 
     // write configuration struct to flash at adress 4
     Serial.print("Writing data to 0x");
     Serial.println((intptr_t)firstDataAddress, HEX);
-    dueFlashStorage.write(const_cast<byte*>(firstDataAddress) + 4, &configuration, sizeof(Configuration)); // write config struct content to flash
+    dueFlashStorage.write2addr(const_cast<byte*>(firstDataAddress) + 4, configuration); // write config struct content to flash
 
     // write 0 to address 0 to indicate that it is not the first time running anymore
     dueFlashStorage.write(0, 0, sizeof(uint32_t)); 
@@ -150,6 +150,7 @@ void loop() {
   // write configuration struct to flash at adress 4
   dueFlashStorage.write(4, (const byte *)cfg, sizeof(Configuration));
 
+  // halt after 5 rounds to prevent wearing out your flash quickly during these experiments...
   {
     static int cnt = 0;
     cnt++;
