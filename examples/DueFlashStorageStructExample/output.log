@@ -1,0 +1,267 @@
+
+
+
+
+
+DueFlashStorage: reading/writing a config struct from/to flash example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageStructExample\DueFlashStorageExample.ino
+
+
+Flash start: 0xFFFFFFFF
+Flash free storage area start address: 0x87500
+
+966 free blocks at 0x87500..0x1000FC
+
+First free block is at: 0x87500, address @ offset 0 = 0x87500
+Found value at first data address: 0xFFFFFFFF
+Address is : 0x87500
+Is first start: yes
+Writing data to 0x87500
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+Reading CFG from flash: 
+1
+a:22 b:0 bigInteger:1147483647 message:Hello world! (1147483647) c:s
+===========================================
+1
+1
+a:22 b:0 bigInteger:1147483647 message:Hello world! (1147483647) c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:0 bigInteger:1147483647 message:Hello world! (1147483647) c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:1 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:1 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+
+
+
+
+
+
+DueFlashStorage: reading/writing a config struct from/to flash example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageStructExample\DueFlashStorageExample.ino
+
+
+Flash start: 0x0
+Flash free storage area start address: 0x87500
+
+1 used blocks at 0x87500..0x876FC
+965 free blocks at 0x87700..0x1000FC
+
+First free block is at: 0x87500, address @ offset 0 = 0x87500
+Found value at first data address: 0x0
+Address is : 0x87500
+Is first start: no
+Reading CFG from flash: 
+1
+a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
+===========================================
+1
+1
+a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:2 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:3 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:3 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+
+
+
+
+
+
+DueFlashStorage: reading/writing a config struct from/to flash example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageStructExample\DueFlashStorageExample.ino
+
+
+Flash start: 0x0
+Flash free storage area start address: 0x87500
+
+1 used blocks at 0x87500..0x876FC
+965 free blocks at 0x87700..0x1000FC
+
+First free block is at: 0x87500, address @ offset 0 = 0x87500
+Found value at first data address: 0x0
+Address is : 0x87500
+Is first start: no
+Reading CFG from flash: 
+1
+a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
+===========================================
+1
+1
+a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:4 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:5 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:5 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+
+
+
+
+
+
+DueFlashStorage: reading/writing a config struct from/to flash example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageStructExample\DueFlashStorageExample.ino
+
+
+Flash start: 0x0
+Flash free storage area start address: 0x87500
+
+1 used blocks at 0x87500..0x876FC
+965 free blocks at 0x87700..0x1000FC
+
+First free block is at: 0x87500, address @ offset 0 = 0x87500
+Found value at first data address: 0x0
+Address is : 0x87500
+Is first start: no
+Reading CFG from flash: 
+1
+a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
+===========================================
+1
+1
+a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:6 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:7 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:7 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+
+
+
+
+
+
+DueFlashStorage: reading/writing a config struct from/to flash example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageStructExample\DueFlashStorageExample.ino
+
+
+Flash start: 0x0
+Flash free storage area start address: 0x87500
+
+1 used blocks at 0x87500..0x876FC
+965 free blocks at 0x87700..0x1000FC
+
+First free block is at: 0x87500, address @ offset 0 = 0x87500
+Found value at first data address: 0x0
+Address is : 0x87500
+Is first start: no
+Reading CFG from flash: 
+1
+a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
+===========================================
+1
+1
+a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:8 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:9 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+-----------------------------------------
+1
+1
+a:22 b:9 bigInteger:1147483647 message:Hello world! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+-----------------------------------------
+1
+1
+a:22 b:10 bigInteger:1147483647 message:Hello Arduino Due! c:s
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+

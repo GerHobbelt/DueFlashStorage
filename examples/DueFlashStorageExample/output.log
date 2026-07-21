@@ -1,0 +1,95 @@
+
+
+
+
+
+DueFlashStorage: basic flash read/write API usage example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageExample\DueFlashStorageExample.ino
+
+
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+0:1 1:100 2:100  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+-----------------------------------------
+0:1 1:100 2:100  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+
+-----------------------------------------
+0:1 1:100 2:101  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+-----------------------------------------
+0:1 1:100 2:101  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+
+-----------------------------------------
+0:1 1:100 2:102  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+
+
+
+
+
+
+DueFlashStorage: basic flash read/write API usage example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageExample\DueFlashStorageExample.ino
+
+
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+0:2 1:100 2:102  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+-----------------------------------------
+0:2 1:100 2:102  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+
+-----------------------------------------
+0:2 1:100 2:103  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+-----------------------------------------
+0:2 1:100 2:103  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+
+-----------------------------------------
+0:2 1:100 2:104  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+
+
+
+
+
+
+DueFlashStorage: basic flash read/write API usage example Z:\lib\tooling\qiqqa\MuPDF\thirdparty\owemdjee\DueFlashStorage\examples\DueFlashStorageExample\DueFlashStorageExample.ino
+
+
+  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+0:3 1:100 2:104  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+-----------------------------------------
+0:3 1:100 2:104  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+
+-----------------------------------------
+0:3 1:100 2:105  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+-----------------------------------------
+0:3 1:100 2:105  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash write sans erase failed; retrying with erase.
+
+-----------------------------------------
+0:3 1:100 2:106  debug level 0: Must disable interrupts when writing to flash; this is done automatically.
+  debug level 1: Flash sector already contains matching data: skipping write operation.
+
+Halting... (press RESET button to observe the last written CFG being kept intact in flash storage)
+
