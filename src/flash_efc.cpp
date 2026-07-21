@@ -44,6 +44,7 @@
 #include <string.h>
 #include <assert.h>
 #include "flash_efc.h"
+#include "efc.h"
 
 /// @cond 0
 /**INDENT-OFF**/
@@ -61,23 +62,8 @@ extern "C" {
  * @{
  */
 
-#if SAM4E
 /* User signature size */
 # define FLASH_USER_SIG_SIZE   (512)
-#endif
-
-#if SAM4S
-/* Internal Flash Controller 0. */
-# define EFC     EFC0
-/* User signature size */
-# define FLASH_USER_SIG_SIZE   (512)
-/* Internal Flash 0 base address. */
-# define IFLASH_ADDR     IFLASH0_ADDR
-/* Internal flash page size. */
-# define IFLASH_PAGE_SIZE     IFLASH0_PAGE_SIZE
-/* Internal flash lock region size. */
-# define IFLASH_LOCK_REGION_SIZE     IFLASH0_LOCK_REGION_SIZE
-#endif
 
 /* Internal Flash Controller 0. */
 # define EFC     EFC0
@@ -89,9 +75,6 @@ extern "C" {
 # define IFLASH_PAGE_SIZE     IFLASH0_PAGE_SIZE
 /* Internal flash lock region size. */
 # define IFLASH_LOCK_REGION_SIZE     IFLASH0_LOCK_REGION_SIZE
-
-/* Flash page buffer for alignment */
-static uint32_t gs_ul_page_buffer[IFLASH_PAGE_SIZE / sizeof(uint32_t)];
 
 /**
  * \brief Translate the given flash address to page and offset values.
@@ -487,7 +470,9 @@ uint32_t flash_erase_sector(uint32_t ul_address)
 int flash_memcmp(const uint8_t *p_dst_address, const uint8_t *p_src_address, uint32_t size)
 {
   int state = 0;
+#if 0	     // this code chunk is more suitable for EEPROM; the SAM3 flash has some very specific non-EEPROM-alike behaviour though!
   while (size > 0) {
+    size--;
     uint8_t dv = *p_dst_address++;
     uint8_t sv = *p_src_address++;
 	uint8_t change = dv ^ sv;
@@ -505,6 +490,31 @@ int flash_memcmp(const uint8_t *p_dst_address, const uint8_t *p_src_address, uin
 	  state = 1;
 	}
   }
+#else
+  // Atmel/Microchip SAM3X datasheet says the flash can only be be programmed in strips of 128 bits,
+  // so everything must be 0XFF in there before we go and try to write anything without erasing first!
+  while (size > 0) {
+    size--;
+    uint8_t dv = *p_dst_address++;
+    uint8_t sv = *p_src_address++;
+	uint8_t change = dv ^ sv;
+	if (change != 0) {
+	  // when any of the bits are 1 in the XOR result, then that implies change.
+	  // Now we need to find out if the addressed 128-bit strip is empty or not. If it isn't: erase required.
+      intptr_t d = (intptr_t)(p_dst_address - 1);
+	  d &= ~(intptr_t)0x1F;	// align to 128-bit boundary
+	  uint64_t *dp = (uint64_t *)d;
+	  if (~dp[0] != 0 || ~dp[1] != 0) {
+	    // entire chunk carries some non-0xFF bytes: erase required!
+        return -1;
+	  }
+	  // when the current byte does not require a mandatory erase cycle, that doesn't mean
+	  // any subsequent byte in the buffer may not require such, so we better make sure and scan
+	  // the remainder of the buffer, until we hit either the worst-case scenario or reach the end.
+	  state = 1;
+	}
+  }
+#endif
   return state;
 }
 
@@ -523,6 +533,48 @@ int flash_memcmp(const uint8_t *p_dst_address, const uint8_t *p_src_address, uin
  * \param ul_erase_flag Flag to set if erase first.
  *
  * \return 0 if successful, otherwise returns an error code.
+ *
+ * Notes:
+ *
+ * From the Atmel/Microchip SAM3X datasheet:
+ *
+ * (page 296) section 18.4.3.2 Write Commands
+ *
+Several commands can be used to program the Flash.
+Flash technology requires that an erase is done before programming. The full memory plane can be erased at the
+same time, or several pages can be erased at the same time (refer to Section ”The Partial Programming mode
+works only with 128-bit (or higher) boundaries. It cannot be used with boundaries lower than 128 bits (8, 16 or 32-
+bit for example).”). Also, a page erase can be automatically done before a page write using EWP or EWPL
+commands.
+After programming, the page (the whole lock region) can be locked to prevent miscellaneous write or erase
+sequences. The lock bit can be automatically set after page programming using WPL or EWPL commands.
+Data to be written are stored in an internal latch buffer. The size of the latch buffer corresponds to the page size.
+The latch buffer wraps around within the internal memory area address space and is repeated as many times as
+the number of pages within this address space.
+Note:
+Writing of 8-bit and 16-bit data is not allowed and may lead to unpredictable data corruption.
+Write operations are performed in a number of wait states equal to the number of wait states for read operations.
+Data are written to the latch buffer before the programming command is written to the Flash Command Register
+EEFC_FCR. The sequence is as follows:
+
+Write the full page, at any page address, within the internal memory area address space.
+
+Programming starts as soon as the page number and the programming command are written to the Flash
+Command Register. The FRDY bit in the Flash Programming Status Register (EEFC_FSR) is automatically
+cleared.
+
+When programming is completed, the FRDY bit in the Flash Programming Status Register (EEFC_FSR)
+rises. If an interrupt has been enabled by setting the bit FRDY in EEFC_FMR, the corresponding interrupt
+line of the NVIC is activated.
+
+[...]
+
+By using the WP command, a page can be programmed in several steps if it has been erased before (see Figure
+18-6).
+
+The Partial Programming mode works only with 128-bit (or higher) boundaries. It cannot be used with boundaries
+lower than 128 bits (8, 16 or 32-bit for example).
+
  */
 uint32_t flash_write(uint32_t ul_address, const void *p_buffer,
 		uint32_t ul_size, uint32_t ul_erase_flag)
@@ -537,7 +589,11 @@ uint32_t flash_write(uint32_t ul_address, const void *p_buffer,
 	uint32_t ul_error;
 	uint32_t ul_idx;
 	uint32_t *p_aligned_dest;
-	uint8_t *puc_page_buffer = (uint8_t *) gs_ul_page_buffer;
+
+	/* Flash page buffer for alignment */
+	/* static */ uint32_t gs_ul_page_buffer[IFLASH_PAGE_SIZE / sizeof(uint32_t)];  // 256 bytes; fits easily on the stack, so no need to clutter global RAM space with this...
+
+	uint8_t * const puc_page_buffer = (uint8_t *) gs_ul_page_buffer;
 
 	translate_address(&p_efc, ul_address, &us_page, &us_offset);
 
@@ -554,30 +610,57 @@ uint32_t flash_write(uint32_t ul_address, const void *p_buffer,
 		us_padding = IFLASH_PAGE_SIZE - us_offset - writeSize;
 
 		/* Check if the current data already matches the data to be written: if so, SKIP */
-		auto match = flash_memcmp((const uint8_t *)ul_page_addr + us_offset, p_buffer, writeSize);
+		auto match = flash_memcmp((const uint8_t *)ul_page_addr + us_offset, (const uint8_t *)p_buffer, writeSize);
 		if (match != 0) {
 			/* Pre-buffer data */
-			memcpy(puc_page_buffer, (void *)ul_page_addr, us_offset);
+			if (us_offset != 0) {
+				memcpy(puc_page_buffer, (void *)ul_page_addr, us_offset);
+			}
 
 			/* Buffer data */
 			memcpy(puc_page_buffer + us_offset, p_buffer, writeSize);
 
 			/* Post-buffer data */
-			memcpy(puc_page_buffer + us_offset + writeSize,
-					(void *)(ul_page_addr + us_offset + writeSize),
-					us_padding);
+			if (us_padding != 0) {
+				memcpy(puc_page_buffer + us_offset + writeSize,
+						(void *)(ul_page_addr + us_offset + writeSize),
+						us_padding);
+			}
 
 			/* Write page.
+			 *
 			 * Writing 8-bit and 16-bit data is not allowed and may lead to
 			 * unpredictable data corruption.
+			 *
+			 * Datasheet says 'partial page write' is only possible for 128-bit wide
+			 * elements and datasheet section 18.4.3.2 (page 296), figure 18.6 & environs says:
+			 *
+			 * > By using the WP command, a page can be programmed in several steps 
+			 * > if it has been erased before (see Figure 18-6).
+			 * >
+			 * > (Figure 18-6. Example of Partial Page Programming)
+			 * > 
+			 * > The Partial Programming mode works only with 128-bit (or higher) boundaries. 
+			 * > It cannot be used with boundaries lower than 128 bits (8, 16 or 32-bit 
+			 * > for example).
+			 *
+			 * --> that's what `flash_memcmp()` has to keep in mind when we check whether
+			 * we need to erase the page as part of this write, or not.
+			 *
+			 * Unfortunately, ERASE acts PER REGION, *not* per page! So that adds further hassle,
+			 * which we push back to the caller to deal with at a higher abstraction layer instead
+			 * of right here, unless the `ul_erase_flag` has been set!
 			 */
 			p_aligned_dest = (uint32_t *) ul_page_addr;
-			for (ul_idx = 0; ul_idx < (IFLASH_PAGE_SIZE / sizeof(uint32_t));
-					++ul_idx) {
+			for (ul_idx = 0; ul_idx < (IFLASH_PAGE_SIZE / sizeof(uint32_t)); ++ul_idx) {
 				*p_aligned_dest++ = gs_ul_page_buffer[ul_idx];
 			}
 
-			if (ul_erase_flag || (match < 0)) {
+			if ((match < 0) && !ul_erase_flag) {
+				return FLASH_RC_NEEDS_ERASE;
+			}
+
+			if (ul_erase_flag) {
 				ul_error = efc_perform_command(p_efc, EFC_FCMD_EWP,
 						us_page);
 			} else {
@@ -590,7 +673,7 @@ uint32_t flash_write(uint32_t ul_address, const void *p_buffer,
 			}
 		}
 		else {
-			flash_debug(1, "Flash sector already contains matching data: skipping write operation\n");
+			flash_debug(1, "Flash sector already contains matching data: skipping write operation.");
 		}
 		
 		/* Progression */
