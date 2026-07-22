@@ -1,9 +1,12 @@
-/* This example will write a chunk of data, then intermittantly attempts to rewrite/overwrite 
-   that chunk with the very same or minimally updated data: only in the latter scenario should
-   DueFlashStorage trigger a flash page erase action.
+/* Same simple wear-leveling demo code as DueFlashStorageOverwriteWithSameExample but now we
+   start and limit ourselves to using the IFLASH1 area, instead of using all available space
+   (i.e. part of IFLASH0 alongside IFLASH1)
    
-   This code also reads directly from flash instead of using the read APIs; after all, 
-   it's just another chunk of memory/ROM!
+   The visible effect should be that the DueFlashStorage internals optimize of this and thus
+   DO NOT disable interrupts / block everything while writing chunks to flash.
+   
+   Compare this source file against the same-named one in ../DueFlashStorageOverwriteWithSameExample/
+   to observe the edits/diffs required for this change of behaviour.
 */
 
 #if 0
@@ -127,21 +130,40 @@ void setup() {
 
   /* Flash is erased every time new code is uploaded. Write the default configuration to flash if first time */
 
-  const byte* const flash_data_address = dueFlashStorage.getFirstFreeBlock();
+  // N.B.: do NOT use readAddress(IFLASH0_SIZE) method call as that is feeding an *absolute*
+  // flash offset into a relative conversion function.
+  // Also note that we check if the firmware is so fat that it has filled over into FLASH1 already:
+  // in that case, we abort by locking up. Kinda like `assert()` but for embedded applications.
+  const byte* const flash_data_address = dueFlashStorage.readAbsoluteAddress(IFLASH0_SIZE);
+
+  // 
+  // Of course, this demo app is so small that this check does not fire here, but when you copy-paste
+  // this into your own, larger code base, it's good to have seen the check -- which is self-explanatory.
+  //
+  if (flash_data_address < dueFlashStorage.getFirstFreeBlock()) {
+    Serial.println("not enough space left on this device for this demo.\n\nHALTING...");
+    Serial.flush();
+    while (1) 
+      ;   // spin forever...
+  }
 
   // running for the first time?
   const TestData& test_cfg = *((const TestData *)flash_data_address);
   bool is_very_first_run = (0xFF == test_cfg.b0); // flash bytes will be 255 at first run
   if (is_very_first_run) {
     TestData fresh_cfg;
-    Serial.print("writing a fresh CFG at index 0: ");
-    Serial.println(dueFlashStorage.write(0, fresh_cfg));  // address 0
+    Serial.print("writing a fresh CFG at address 0x");
+    Serial.print((intptr_t)flash_data_address, HEX);
+    Serial.print(": ");
+    // can't use write(IFLASH0_SIZE, ...) as, again, that's feeding an absolute offset
+    // into a relative offset-using function. But no worries: we have the address!
+    Serial.println(dueFlashStorage.write_at_addr((byte *)flash_data_address, fresh_cfg));  // address 0
     
     fresh_cfg.display();
   
     cfg = fresh_cfg;
     // and the slot/address where we're supposed to have written this chunk
-    cfg_flash_slot_address = (const TestData *)dueFlashStorage.readAddress(0);
+    cfg_flash_slot_address = (const TestData *)flash_data_address;
   }
   else {
     // now we're going to do something different from the other examples:
@@ -220,7 +242,7 @@ void setup() {
     cfg_flash_slot_address = TestData::get_next_flash_slot_address(last_used);
     if (((const byte *)(cfg_flash_slot_address + 1)) > flash_end_address) {
       // wrap! prevent out-of-bounds writing of the CFG
-      cfg_flash_slot_address = (const TestData *)dueFlashStorage.readAddress(0);
+      cfg_flash_slot_address = (const TestData *)dueFlashStorage.readAbsoluteAddress(IFLASH0_SIZE);
     }
 
     Serial.print("writing an updated CFG at address 0x");
@@ -267,7 +289,7 @@ void loop() {
     cfg_flash_slot_address = TestData::get_next_flash_slot_address(cfg_flash_slot_address);
     if (cfg_flash_slot_address + 1 > flash_end_address) {
       // wrap! prevent out-of-bounds writing of the CFG:
-      cfg_flash_slot_address = (const TestData *)dueFlashStorage.readAddress(0);
+      cfg_flash_slot_address = (const TestData *)dueFlashStorage.readAbsoluteAddress(IFLASH0_SIZE);
     }
 
     Serial.print("writing an updated CFG at address 0x");
