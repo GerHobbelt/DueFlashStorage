@@ -164,15 +164,3 @@ bool DueFlashStorage::write_at_addr(byte* address, const byte* data, uint32_t da
   return result;
 }
 
-// ----------------------------------------------------------------------------------------------------
-
-extern "C"
-WEAK 
-void flash_debug(int level, const char *message) {
-  Serial.print("  DueFlashDebug: level ");
-  Serial.print(level);
-  Serial.print(": ");
-  Serial.print(message);
-  Serial.println();
-}
-
