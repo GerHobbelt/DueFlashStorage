@@ -74,9 +74,14 @@ public:
 	byte *read_at_addr(byte *dest_address, uint32_t dataLength, const byte *flash_address);
 
 	// This returns the physical address of the given flash offset. 
-	// 0 returns the start of the available data space in the flash, as produced by
+	// Offset 0 returns the start of the available data space in the flash, as produced by
 	// `getFirstFreeBlock()`.
 	const byte* readAddress(uint32_t address);
+
+	// This returns the physical address of the given flash offset. 
+	// Offset 0 returns the start of the entire flash (flash0 + flash1).
+	// This simple function is used to convert absolute offsets in flash to directly addressable pointers.
+	const byte* readAbsoluteAddress(uint32_t address) const;
 
 	// Return the flash offset for the given physical address.
 	uint32_t getOffset(const byte* address);
@@ -87,6 +92,9 @@ public:
 	const byte* getFirstFreeBlock();
 
 	uint32_t getAvailableFlashSize();
+
+    // points one past the last flash storage memory address, i.e. *just beyond the end of the flash*.
+    const byte* getFlashEndAddress() const;
 
 	// Test if the given offset is within the freely available space in the Flash.
 	//

@@ -51,6 +51,9 @@ const byte* DueFlashStorage::readAddress(uint32_t address) {
   return getFirstFreeBlock() + address;
 }
 
+const byte* DueFlashStorage::readAbsoluteAddress(uint32_t address) const {
+  return FLASH_START + address;
+}
 uint32_t DueFlashStorage::getOffset(const byte* address) {
   return address - getFirstFreeBlock();
 }
@@ -72,6 +75,10 @@ uint32_t DueFlashStorage::getAvailableFlashSize() {
     return IFLASH0_SIZE + IFLASH1_SIZE - (getFirstFreeBlock() - FLASH_START);
 }
 
+const byte* DueFlashStorage::getFlashEndAddress() const {
+    return FLASH_START + IFLASH0_SIZE + IFLASH1_SIZE;
+}
+
 bool DueFlashStorage::validateAddress_at_addr(const byte* address, uint32_t dataLength) {
 
 #if 01
@@ -86,12 +93,12 @@ bool DueFlashStorage::validateAddress_at_addr(const byte* address, uint32_t data
   }
 #endif
 
-  if (address >= FLASH_START + IFLASH0_SIZE + IFLASH1_SIZE) {
+  if (address >= getFlashEndAddress()) {
     flash_debug(2, "Flash write address too high.");
     return false;
   }
 
-  if (address + dataLength > FLASH_START + IFLASH0_SIZE + IFLASH1_SIZE) {
+  if (address + dataLength > getFlashEndAddress()) {
     flash_debug(2, "Attempt to write past Flash boundary.");
     return false;
   }
