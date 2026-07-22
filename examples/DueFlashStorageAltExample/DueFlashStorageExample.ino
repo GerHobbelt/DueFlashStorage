@@ -100,6 +100,7 @@ struct FlashDebugMessageStore {
   int8_t level[3];
   const char *message[3];
 } flash_debug_msg_store{0, {}, {}};
+#pragma pack(pop)
 
 // non-weak: this one overrides the default debug output function in the library
 extern "C"
