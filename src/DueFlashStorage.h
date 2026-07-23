@@ -1,10 +1,10 @@
-/* 
+/*
 DueFlashStorage saves non-volatile data for Arduino Due.
 The library is made to be similar to EEPROM library
 Uses flash block 1 per default.
 
 Note: uploading new software will erase all flash so data written to flash
-using this library will not survive a new software upload. 
+using this library will not survive a new software upload.
 
 Inspiration from Pansenti at https://github.com/Pansenti/DueFlash
 Rewritten and modified by Sebastian Nilsson
@@ -29,7 +29,7 @@ public:
 	DueFlashStorage();
 
 	// write() writes the specified amount of data into flash.
-	// address is the offset from the start of 'available space' 
+	// address is the offset from the start of 'available space'
 	// as specified by `getFirstFreeBlock()`.
 	// data is a pointer to the data to be written
 	// dataLength is length of data in bytes
@@ -73,12 +73,12 @@ public:
 	}
 	byte *read_at_addr(byte *dest_address, uint32_t dataLength, const byte *flash_address);
 
-	// This returns the physical address of the given flash offset. 
+	// This returns the physical address of the given flash offset.
 	// Offset 0 returns the start of the available data space in the flash, as produced by
 	// `getFirstFreeBlock()`.
 	const byte* readAddress(uint32_t address);
 
-	// This returns the physical address of the given flash offset. 
+	// This returns the physical address of the given flash offset.
 	// Offset 0 returns the start of the entire flash (flash0 + flash1).
 	// This simple function is used to convert absolute offsets in flash to directly addressable pointers.
 	const byte* readAbsoluteAddress(uint32_t address) const;
@@ -91,7 +91,19 @@ public:
 	// then crash the CPU.
 	const byte* getFirstFreeBlock();
 
-	uint32_t getAvailableFlashSize();
+    // Ditto as getFirstFreeBlock() but restricts the returned address to always sit in the second flash, i.e. FLASH1,
+    // even if there's also some space available in FLASH0.
+    const byte* getFirstFreeBlockInSecondFlashZone();
+
+    // companion to getFirstFreeBlock(). Does what it says on the tin.
+	uint32_t getAvailableFlashSize() {
+	  return getFlashEndAddress() - getFirstFreeBlock();
+    }
+
+    // companion to getFirstFreeBlockInSecondFlashZone(). Does what it says on the tin.
+	uint32_t getAvailableFlashSizeInSecondFlashZone() {
+	  return getFlashEndAddress() - getFirstFreeBlockInSecondFlashZone();
+    }
 
     // points one past the last flash storage memory address, i.e. *just beyond the end of the flash*.
     const byte* getFlashEndAddress() const;

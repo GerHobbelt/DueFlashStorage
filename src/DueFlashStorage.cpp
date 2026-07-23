@@ -71,8 +71,12 @@ const byte* DueFlashStorage::getFirstFreeBlock() {
   return rom_end;
 }
 
-uint32_t DueFlashStorage::getAvailableFlashSize() {
-    return IFLASH0_SIZE + IFLASH1_SIZE - (getFirstFreeBlock() - FLASH_START);
+const byte* DueFlashStorage::getFirstFreeBlockInSecondFlashZone() {
+  const byte* rom_end = getFirstFreeBlock();
+  const byte* flash1_start = FLASH_START + IFLASH0_SIZE;
+  if (flash1_start >= rom_end)
+      return flash1_start;
+  return rom_end;
 }
 
 const byte* DueFlashStorage::getFlashEndAddress() const {
