@@ -35,9 +35,17 @@
 // in this example code)
 //
 
+#if defined(__GNUC__) && (__GNUC__ > 4)
 struct fakeCodeWord {
   uint32_t fake{0xDEAD7007u};
 };
+#else
+// just make it compile... don't bother with the default initializer value: we're fine with any kind of crap ending up in here...
+extern "C"
+struct fakeCodeWord {
+  uint32_t fake;
+};
+#endif
 
 // simulate a large application by defining a large, initialized, 'code' chunk instead:
 const fakeCodeWord simulated_small_application_ROM_chunk[20 * 1024/4] =  {999,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
